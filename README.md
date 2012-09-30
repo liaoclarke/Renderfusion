@@ -1,7 +1,14 @@
 Renderfusion
 ============
 
-Porting renderscript to AMD APU
+
+This is project RenderFusion, welcoming to play it!
+
+## Purpose
+
+Porting Android renderscript to AMD APU platform, for now, renderscript only support perform data parallelism
+for Java program on _CPU_ only, our task is making renderscript generates native GPU-instruction which feed to
+APU.
 
 Hardware Platform: 
 APU: APU-E350(Brazos, Zacate)
@@ -15,3 +22,6 @@ Gallium(back-end)
 Android libdrm
 GNU/Linux Kernel(drm) 
 Graphics accelerator driver(radeon)
+
+## Git
+git clone git://github.com/liaoclarke/Renderfusion.git
