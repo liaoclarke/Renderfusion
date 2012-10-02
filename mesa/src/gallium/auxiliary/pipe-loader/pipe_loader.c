@@ -33,12 +33,12 @@
 #include "util/u_dl.h"
 
 #define MODULE_PREFIX "pipe_"
-
+//xliu: delete pipe-loader-sw because it relies on X11.h
 static int (*backends[])(struct pipe_loader_device **, int) = {
 #ifdef HAVE_PIPE_LOADER_DRM
    &pipe_loader_drm_probe,
 #endif
-   &pipe_loader_sw_probe
+//   &pipe_loader_sw_probe
 };
 
 int

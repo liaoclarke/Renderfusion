@@ -149,7 +149,9 @@ C_SOURCES := \
         vl/vl_idct.c \
 	vl/vl_mc.c \
         vl/vl_vertex_buffers.c \
-        vl/vl_video_buffer.c
+        vl/vl_video_buffer.c \
+    pipe-loader/pipe_loader.c \
+    pipe-loader/pipe_loader_drm.c 
 
 GENERATED_SOURCES := \
 	indices/u_indices_gen.c \

@@ -71,18 +71,18 @@ endif
 
 # add subdirectories
 ifneq ($(strip $(MESA_GPU_DRIVERS)),)
-
-SUBDIRS := \
-	src/mapi \
-	src/glsl \
-	src/mesa \
-	src/egl/main
-
-ifeq ($(strip $(MESA_BUILD_CLASSIC)),true)
-SUBDIRS += \
-	src/egl/drivers/dri2 \
-	src/mesa/drivers/dri
-endif
+#
+#SUBDIRS := \
+#	src/mapi \
+#	src/glsl \
+#	src/mesa \
+#	src/egl/main
+#
+#ifeq ($(strip $(MESA_BUILD_CLASSIC)),true)
+#SUBDIRS += \
+#	src/egl/drivers/dri2 \
+#	src/mesa/drivers/dri
+#endif
 
 ifeq ($(strip $(MESA_BUILD_GALLIUM)),true)
 SUBDIRS += src/gallium
