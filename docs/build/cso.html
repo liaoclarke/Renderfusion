@@ -1,0 +1,180 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CSO &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="index.html" />
+    <link rel="next" title="Blend" href="cso/blend.html" />
+    <link rel="prev" title="Context" href="context.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cso/blend.html" title="Blend"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="context.html" title="Context"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cso">
+<h1>CSO<a class="headerlink" href="#cso" title="Permalink to this headline">¶</a></h1>
+<p>CSO, Constant State Objects, are a core part of Gallium&#8217;s API.</p>
+<p>CSO work on the principle of reusable state; they are created by filling
+out a state object with the desired properties, then passing that object
+to a context. The context returns an opaque context-specific handle which
+can be bound at any time for the desired effect.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cso/blend.html">Blend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/blend.html#blend-factors">Blend Factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/blend.html#logical-operations">Logical Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/blend.html#members">Members</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/blend.html#dither">dither</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cso/blend.html#logicop-enable">logicop_enable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cso/blend.html#logicop-func">logicop_func</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cso/blend.html#per-rendertarget-members">Per-rendertarget Members</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cso/dsa.html">Depth, Stencil, &amp; Alpha</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/dsa.html#depth-members">Depth Members</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/dsa.html#stencil-members">Stencil Members</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/dsa.html#alpha-members">Alpha Members</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cso/rasterizer.html">Rasterizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#clamp-vertex-color">clamp_vertex_color</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#clamp-fragment-color">clamp_fragment_color</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/rasterizer.html#shading">Shading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#flatshade">flatshade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#flatshade-first">flatshade_first</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/rasterizer.html#polygons">Polygons</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#light-twoside">light_twoside</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/rasterizer.html#lines">Lines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cso/rasterizer.html#points">Points</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#sprite-coord-enable">sprite_coord_enable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#sprite-coord-mode">sprite_coord_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cso/rasterizer.html#point-quad-rasterization">point_quad_rasterization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/rasterizer.html#other-members">Other Members</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cso/sampler.html">Sampler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/sampler.html#members">Members</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cso/shader.html">Shader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/shader.html#members">Members</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cso/velems.html">Vertex Elements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cso/velems.html#input-formats">Input Formats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cso/velems.html#position">Position</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cso/velems.html#colors">Colors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cso/velems.html#members">Members</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="context.html"
+                        title="previous chapter">Context</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cso/blend.html"
+                        title="next chapter">Blend</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/cso.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cso/blend.html" title="Blend"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="context.html" title="Context"
+             >previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

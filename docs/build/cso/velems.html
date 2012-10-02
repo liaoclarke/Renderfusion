@@ -1,0 +1,178 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Vertex Elements &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="../index.html" />
+    <link rel="up" title="CSO" href="../cso.html" />
+    <link rel="next" title="Distribution" href="../distro.html" />
+    <link rel="prev" title="Shader" href="shader.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../distro.html" title="Distribution"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="shader.html" title="Shader"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Gallium 0.4 documentation</a> &raquo;</li>
+          <li><a href="../cso.html" accesskey="U">CSO</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vertex-elements">
+<span id="vertexelements"></span><h1>Vertex Elements<a class="headerlink" href="#vertex-elements" title="Permalink to this headline">¶</a></h1>
+<p>This state controls the format of the input attributes contained in
+pipe_vertex_buffers. There is one pipe_vertex_element array member for each
+input attribute.</p>
+<div class="section" id="input-formats">
+<h2>Input Formats<a class="headerlink" href="#input-formats" title="Permalink to this headline">¶</a></h2>
+<p>Gallium supports a diverse range of formats for vertex data. Drivers are
+guaranteed to support 32-bit floating-point vectors of one to four components.
+Additionally, they may support the following formats:</p>
+<ul class="simple">
+<li>Integers, signed or unsigned, normalized or non-normalized, 8, 16, or 32
+bits wide</li>
+<li>Floating-point, 16, 32, or 64 bits wide</li>
+</ul>
+<p>At this time, support for varied vertex data formats is limited by driver
+deficiencies. It is planned to support a single uniform set of formats for all
+Gallium drivers at some point.</p>
+<p>Rather than attempt to specify every small nuance of behavior, Gallium uses a
+very simple set of rules for padding out unspecified components. If an input
+uses less than four components, it will be padded out with the constant vector
+<tt class="docutils literal"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1)</span></tt>.</p>
+<p>Fog, point size, the facing bit, and edgeflags, all are in the standard format
+of <tt class="docutils literal"><span class="pre">(x,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1)</span></tt>, and so only the first component of those inputs is used.</p>
+<div class="section" id="position">
+<h3>Position<a class="headerlink" href="#position" title="Permalink to this headline">¶</a></h3>
+<p>Vertex position may be specified with two to four components. Using less than
+two components is not allowed.</p>
+</div>
+<div class="section" id="colors">
+<h3>Colors<a class="headerlink" href="#colors" title="Permalink to this headline">¶</a></h3>
+<p>Colors, both front- and back-facing, may omit the alpha component, only using
+three components. Using less than three components is not allowed.</p>
+</div>
+</div>
+<div class="section" id="members">
+<h2>Members<a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>src_offset</dt>
+<dd>The byte offset of the attribute in the buffer given by
+vertex_buffer_index for the first vertex.</dd>
+<dt>instance_divisor</dt>
+<dd>The instance data rate divisor, used for instancing.
+0 means this is per-vertex data, n means per-instance data used for
+n consecutive instances (n &gt; 0).</dd>
+<dt>vertex_buffer_index</dt>
+<dd>The vertex buffer this attribute lives in. Several attributes may
+live in the same vertex buffer.</dd>
+<dt>src_format</dt>
+<dd>The format of the attribute data. One of the PIPE_FORMAT tokens.</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Vertex Elements</a><ul>
+<li><a class="reference internal" href="#input-formats">Input Formats</a><ul>
+<li><a class="reference internal" href="#position">Position</a></li>
+<li><a class="reference internal" href="#colors">Colors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members">Members</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="shader.html"
+                        title="previous chapter">Shader</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../distro.html"
+                        title="next chapter">Distribution</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/cso/velems.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../distro.html" title="Distribution"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="shader.html" title="Shader"
+             >previous</a> |</li>
+        <li><a href="../index.html">Gallium 0.4 documentation</a> &raquo;</li>
+          <li><a href="../cso.html" >CSO</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,600 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Context &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="index.html" />
+    <link rel="next" title="CSO" href="cso.html" />
+    <link rel="prev" title="Resources and derived objects" href="resources.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cso.html" title="CSO"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="resources.html" title="Resources and derived objects"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="context">
+<span id="id1"></span><h1>Context<a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h1>
+<p>A Gallium rendering context encapsulates the state which effects 3D
+rendering such as blend state, depth/stencil state, texture samplers,
+etc.</p>
+<p>Note that resource/texture allocation is not per-context but per-screen.</p>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cso-state">
+<h3>CSO State<a class="headerlink" href="#cso-state" title="Permalink to this headline">¶</a></h3>
+<p>All Constant State Object (CSO) state is created, bound, and destroyed,
+with triplets of methods that all follow a specific naming scheme.
+For example, <tt class="docutils literal"><span class="pre">create_blend_state</span></tt>, <tt class="docutils literal"><span class="pre">bind_blend_state</span></tt>, and
+<tt class="docutils literal"><span class="pre">destroy_blend_state</span></tt>.</p>
+<p>CSO objects handled by the context object:</p>
+<ul class="simple">
+<li><a class="reference internal" href="cso/blend.html#blend"><em>Blend</em></a>: <tt class="docutils literal"><span class="pre">*_blend_state</span></tt></li>
+<li><a class="reference internal" href="cso/sampler.html#sampler"><em>Sampler</em></a>: Texture sampler states are bound separately for fragment,
+vertex and geometry samplers.  Note that sampler states are set en masse.
+If M is the max number of sampler units supported by the driver and N
+samplers are bound with <tt class="docutils literal"><span class="pre">bind_fragment_sampler_states</span></tt> then sampler
+units N..M-1 are considered disabled/NULL.</li>
+<li><a class="reference internal" href="cso/rasterizer.html#rasterizer"><em>Rasterizer</em></a>: <tt class="docutils literal"><span class="pre">*_rasterizer_state</span></tt></li>
+<li><em class="xref std std-ref">Depth, Stencil, &amp; Alpha</em>: <tt class="docutils literal"><span class="pre">*_depth_stencil_alpha_state</span></tt></li>
+<li><a class="reference internal" href="cso/shader.html#shader"><em>Shader</em></a>: These are create, bind and destroy methods for vertex,
+fragment and geometry shaders.</li>
+<li><em class="xref std std-ref">Vertex Elements</em>: <tt class="docutils literal"><span class="pre">*_vertex_elements_state</span></tt></li>
+</ul>
+</div>
+<div class="section" id="resource-binding-state">
+<h3>Resource Binding State<a class="headerlink" href="#resource-binding-state" title="Permalink to this headline">¶</a></h3>
+<p>This state describes how resources in various flavours (textures,
+buffers, surfaces) are bound to the driver.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">set_constant_buffer</span></tt> sets a constant buffer to be used for a given shader
+type. index is used to indicate which buffer to set (some apis may allow
+multiple ones to be set, and binding a specific one later, though drivers
+are mostly restricted to the first one right now).</li>
+<li><tt class="docutils literal"><span class="pre">set_framebuffer_state</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_vertex_buffers</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_index_buffer</span></tt></li>
+</ul>
+</div>
+<div class="section" id="non-cso-state">
+<h3>Non-CSO State<a class="headerlink" href="#non-cso-state" title="Permalink to this headline">¶</a></h3>
+<p>These pieces of state are too small, variable, and/or trivial to have CSO
+objects. They all follow simple, one-method binding calls, e.g.
+<tt class="docutils literal"><span class="pre">set_blend_color</span></tt>.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">set_stencil_ref</span></tt> sets the stencil front and back reference values
+which are used as comparison values in stencil test.</li>
+<li><tt class="docutils literal"><span class="pre">set_blend_color</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_sample_mask</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_clip_state</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_polygon_stipple</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">set_scissor_state</span></tt> sets the bounds for the scissor test, which culls
+pixels before blending to render targets. If the <a class="reference internal" href="cso/rasterizer.html#rasterizer"><em>Rasterizer</em></a> does
+not have the scissor test enabled, then the scissor bounds never need to
+be set since they will not be used.  Note that scissor xmin and ymin are
+inclusive, but  xmax and ymax are exclusive.  The inclusive ranges in x
+and y would be [xmin..xmax-1] and [ymin..ymax-1].</li>
+<li><tt class="docutils literal"><span class="pre">set_viewport_state</span></tt></li>
+</ul>
+</div>
+<div class="section" id="sampler-views">
+<h3>Sampler Views<a class="headerlink" href="#sampler-views" title="Permalink to this headline">¶</a></h3>
+<p>These are the means to bind textures to shader stages. To create one, specify
+its format, swizzle and LOD range in sampler view template.</p>
+<p>If texture format is different than template format, it is said the texture
+is being cast to another format. Casting can be done only between compatible
+formats, that is formats that have matching component order and sizes.</p>
+<p>Swizzle fields specify they way in which fetched texel components are placed
+in the result register. For example, <tt class="docutils literal"><span class="pre">swizzle_r</span></tt> specifies what is going to be
+placed in first component of result register.</p>
+<p>The <tt class="docutils literal"><span class="pre">first_level</span></tt> and <tt class="docutils literal"><span class="pre">last_level</span></tt> fields of sampler view template specify
+the LOD range the texture is going to be constrained to. Note that these
+values are in addition to the respective min_lod, max_lod values in the
+pipe_sampler_state (that is if min_lod is 2.0, and first_level 3, the first mip
+level used for sampling from the resource is effectively the fifth).</p>
+<p>The <tt class="docutils literal"><span class="pre">first_layer</span></tt> and <tt class="docutils literal"><span class="pre">last_layer</span></tt> fields specify the layer range the
+texture is going to be constrained to. Similar to the LOD range, this is added
+to the array index which is used for sampling.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">set_fragment_sampler_views</span></tt> binds an array of sampler views to
+fragment shader stage. Every binding point acquires a reference
+to a respective sampler view and releases a reference to the previous
+sampler view.  If M is the maximum number of sampler units and N units
+is passed to set_fragment_sampler_views, the driver should unbind the
+sampler views for units N..M-1.</li>
+<li><tt class="docutils literal"><span class="pre">set_vertex_sampler_views</span></tt> binds an array of sampler views to vertex
+shader stage. Every binding point acquires a reference to a respective
+sampler view and releases a reference to the previous sampler view.</li>
+<li><tt class="docutils literal"><span class="pre">create_sampler_view</span></tt> creates a new sampler view. <tt class="docutils literal"><span class="pre">texture</span></tt> is associated
+with the sampler view which results in sampler view holding a reference
+to the texture. Format specified in template must be compatible
+with texture format.</li>
+<li><tt class="docutils literal"><span class="pre">sampler_view_destroy</span></tt> destroys a sampler view and releases its reference
+to associated texture.</li>
+</ul>
+</div>
+<div class="section" id="shader-resources">
+<h3>Shader Resources<a class="headerlink" href="#shader-resources" title="Permalink to this headline">¶</a></h3>
+<p>Shader resources are textures or buffers that may be read or written
+from a shader without an associated sampler.  This means that they
+have no support for floating point coordinates, address wrap modes or
+filtering.</p>
+<p>Shader resources are specified for all the shader stages at once using
+the <tt class="docutils literal"><span class="pre">set_shader_resources</span></tt> method.  When binding texture resources,
+the <tt class="docutils literal"><span class="pre">level</span></tt>, <tt class="docutils literal"><span class="pre">first_layer</span></tt> and <tt class="docutils literal"><span class="pre">last_layer</span></tt> pipe_surface fields
+specify the mipmap level and the range of layers the texture will be
+constrained to.  In the case of buffers, <tt class="docutils literal"><span class="pre">first_element</span></tt> and
+<tt class="docutils literal"><span class="pre">last_element</span></tt> specify the range within the buffer that will be used
+by the shader resource.  Writes to a shader resource are only allowed
+when the <tt class="docutils literal"><span class="pre">writable</span></tt> flag is set.</p>
+</div>
+<div class="section" id="surfaces">
+<h3>Surfaces<a class="headerlink" href="#surfaces" title="Permalink to this headline">¶</a></h3>
+<p>These are the means to use resources as color render targets or depthstencil
+attachments. To create one, specify the mip level, the range of layers, and
+the bind flags (either PIPE_BIND_DEPTH_STENCIL or PIPE_BIND_RENDER_TARGET).
+Note that layer values are in addition to what is indicated by the geometry
+shader output variable XXX_FIXME (that is if first_layer is 3 and geometry
+shader indicates index 2, the 5th layer of the resource will be used). These
+first_layer and last_layer parameters will only be used for 1d array, 2d array,
+cube, and 3d textures otherwise they are 0.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">create_surface</span></tt> creates a new surface.</li>
+<li><tt class="docutils literal"><span class="pre">surface_destroy</span></tt> destroys a surface and releases its reference to the
+associated resource.</li>
+</ul>
+</div>
+<div class="section" id="stream-output-targets">
+<h3>Stream output targets<a class="headerlink" href="#stream-output-targets" title="Permalink to this headline">¶</a></h3>
+<p>Stream output, also known as transform feedback, allows writing the primitives
+produced by the vertex pipeline to buffers. This is done after the geometry
+shader or vertex shader if no geometry shader is present.</p>
+<p>The stream output targets are views into buffer resources which can be bound
+as stream outputs and specify a memory range where it&#8217;s valid to write
+primitives. The pipe driver must implement memory protection such that any
+primitives written outside of the specified memory range are discarded.</p>
+<p>Two stream output targets can use the same resource at the same time, but
+with a disjoint memory range.</p>
+<p>Additionally, the stream output target internally maintains the offset
+into the buffer which is incremented everytime something is written to it.
+The internal offset is equal to how much data has already been written.
+It can be stored in device memory and the CPU actually doesn&#8217;t have to query
+it.</p>
+<p>The stream output target can be used in a draw command to provide
+the vertex count. The vertex count is derived from the internal offset
+discussed above.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">create_stream_output_target</span></tt> create a new target.</li>
+<li><tt class="docutils literal"><span class="pre">stream_output_target_destroy</span></tt> destroys a target. Users of this should
+use pipe_so_target_reference instead.</li>
+<li><tt class="docutils literal"><span class="pre">set_stream_output_targets</span></tt> binds stream output targets. The parameter
+append_bitmask is a bitmask, where the i-th bit specifies whether new
+primitives should be appended to the i-th buffer (writing starts at
+the internal offset), or whether writing should start at the beginning
+(the internal offset is effectively set to 0).</li>
+</ul>
+<p>NOTE: The currently-bound vertex or geometry shader must be compiled with
+the properly-filled-in structure pipe_stream_output_info describing which
+outputs should be written to buffers and how. The structure is part of
+pipe_shader_state.</p>
+</div>
+<div class="section" id="clearing">
+<h3>Clearing<a class="headerlink" href="#clearing" title="Permalink to this headline">¶</a></h3>
+<p>Clear is one of the most difficult concepts to nail down to a single
+interface (due to both different requirements from APIs and also driver/hw
+specific differences).</p>
+<p><tt class="docutils literal"><span class="pre">clear</span></tt> initializes some or all of the surfaces currently bound to
+the framebuffer to particular RGBA, depth, or stencil values.
+Currently, this does not take into account color or stencil write masks (as
+used by GL), and always clears the whole surfaces (no scissoring as used by
+GL clear or explicit rectangles like d3d9 uses). It can, however, also clear
+only depth or stencil in a combined depth/stencil surface, if the driver
+supports PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE.
+If a surface includes several layers then all layers will be cleared.</p>
+<p><tt class="docutils literal"><span class="pre">clear_render_target</span></tt> clears a single color rendertarget with the specified
+color value. While it is only possible to clear one surface at a time (which can
+include several layers), this surface need not be bound to the framebuffer.</p>
+<p><tt class="docutils literal"><span class="pre">clear_depth_stencil</span></tt> clears a single depth, stencil or depth/stencil surface
+with the specified depth and stencil values (for combined depth/stencil buffers,
+is is also possible to only clear one or the other part). While it is only
+possible to clear one surface at a time (which can include several layers),
+this surface need not be bound to the framebuffer.</p>
+</div>
+<div class="section" id="drawing">
+<h3>Drawing<a class="headerlink" href="#drawing" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">draw_vbo</span></tt> draws a specified primitive.  The primitive mode and other
+properties are described by <tt class="docutils literal"><span class="pre">pipe_draw_info</span></tt>.</p>
+<p>The <tt class="docutils literal"><span class="pre">mode</span></tt>, <tt class="docutils literal"><span class="pre">start</span></tt>, and <tt class="docutils literal"><span class="pre">count</span></tt> fields of <tt class="docutils literal"><span class="pre">pipe_draw_info</span></tt> specify the
+the mode of the primitive and the vertices to be fetched, in the range between
+<tt class="docutils literal"><span class="pre">start</span></tt> to <tt class="docutils literal"><span class="pre">start``+``count</span></tt>-1, inclusive.</p>
+<p>Every instance with instanceID in the range between <tt class="docutils literal"><span class="pre">start_instance</span></tt> and
+<tt class="docutils literal"><span class="pre">start_instance``+``instance_count</span></tt>-1, inclusive, will be drawn.</p>
+<p>If there is an index buffer bound, and <tt class="docutils literal"><span class="pre">indexed</span></tt> field is true, all vertex
+indices will be looked up in the index buffer.</p>
+<p>In indexed draw, <tt class="docutils literal"><span class="pre">min_index</span></tt> and <tt class="docutils literal"><span class="pre">max_index</span></tt> respectively provide a lower
+and upper bound of the indices contained in the index buffer inside the range
+between <tt class="docutils literal"><span class="pre">start</span></tt> to <tt class="docutils literal"><span class="pre">start``+``count</span></tt>-1.  This allows the driver to
+determine which subset of vertices will be referenced during te draw call
+without having to scan the index buffer.  Providing a over-estimation of the
+the true bounds, for example, a <tt class="docutils literal"><span class="pre">min_index</span></tt> and <tt class="docutils literal"><span class="pre">max_index</span></tt> of 0 and
+0xffffffff respectively, must give exactly the same rendering, albeit with less
+performance due to unreferenced vertex buffers being unnecessarily DMA&#8217;ed or
+processed.  Providing a underestimation of the true bounds will result in
+undefined behavior, but should not result in program or system failure.</p>
+<p>In case of non-indexed draw, <tt class="docutils literal"><span class="pre">min_index</span></tt> should be set to
+<tt class="docutils literal"><span class="pre">start</span></tt> and <tt class="docutils literal"><span class="pre">max_index</span></tt> should be set to <tt class="docutils literal"><span class="pre">start``+``count</span></tt>-1.</p>
+<p><tt class="docutils literal"><span class="pre">index_bias</span></tt> is a value added to every vertex index after lookup and before
+fetching vertex attributes.</p>
+<p>When drawing indexed primitives, the primitive restart index can be
+used to draw disjoint primitive strips.  For example, several separate
+line strips can be drawn by designating a special index value as the
+restart index.  The <tt class="docutils literal"><span class="pre">primitive_restart</span></tt> flag enables/disables this
+feature.  The <tt class="docutils literal"><span class="pre">restart_index</span></tt> field specifies the restart index value.</p>
+<p>When primitive restart is in use, array indexes are compared to the
+restart index before adding the index_bias offset.</p>
+<p>If a given vertex element has <tt class="docutils literal"><span class="pre">instance_divisor</span></tt> set to 0, it is said
+it contains per-vertex data and effective vertex attribute address needs
+to be recalculated for every index.</p>
+<blockquote>
+<div>attribAddr = <tt class="docutils literal"><span class="pre">stride</span></tt> * index + <tt class="docutils literal"><span class="pre">src_offset</span></tt></div></blockquote>
+<p>If a given vertex element has <tt class="docutils literal"><span class="pre">instance_divisor</span></tt> set to non-zero,
+it is said it contains per-instance data and effective vertex attribute
+address needs to recalculated for every <tt class="docutils literal"><span class="pre">instance_divisor</span></tt>-th instance.</p>
+<blockquote>
+<div>attribAddr = <tt class="docutils literal"><span class="pre">stride</span></tt> * instanceID / <tt class="docutils literal"><span class="pre">instance_divisor</span></tt> + <tt class="docutils literal"><span class="pre">src_offset</span></tt></div></blockquote>
+<p>In the above formulas, <tt class="docutils literal"><span class="pre">src_offset</span></tt> is taken from the given vertex element
+and <tt class="docutils literal"><span class="pre">stride</span></tt> is taken from a vertex buffer associated with the given
+vertex element.</p>
+<p>The calculated attribAddr is used as an offset into the vertex buffer to
+fetch the attribute data.</p>
+<p>The value of <tt class="docutils literal"><span class="pre">instanceID</span></tt> can be read in a vertex shader through a system
+value register declared with INSTANCEID semantic name.</p>
+</div>
+<div class="section" id="queries">
+<h3>Queries<a class="headerlink" href="#queries" title="Permalink to this headline">¶</a></h3>
+<p>Queries gather some statistic from the 3D pipeline over one or more
+draws.  Queries may be nested, though only d3d1x currently exercises this.</p>
+<p>Queries can be created with <tt class="docutils literal"><span class="pre">create_query</span></tt> and deleted with
+<tt class="docutils literal"><span class="pre">destroy_query</span></tt>. To start a query, use <tt class="docutils literal"><span class="pre">begin_query</span></tt>, and when finished,
+use <tt class="docutils literal"><span class="pre">end_query</span></tt> to end the query.</p>
+<p><tt class="docutils literal"><span class="pre">get_query_result</span></tt> is used to retrieve the results of a query.  If
+the <tt class="docutils literal"><span class="pre">wait</span></tt> parameter is TRUE, then the <tt class="docutils literal"><span class="pre">get_query_result</span></tt> call
+will block until the results of the query are ready (and TRUE will be
+returned).  Otherwise, if the <tt class="docutils literal"><span class="pre">wait</span></tt> parameter is FALSE, the call
+will not block and the return value will be TRUE if the query has
+completed or FALSE otherwise.</p>
+<p>The interface currently includes the following types of queries:</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_OCCLUSION_COUNTER</span></tt> counts the number of fragments which
+are written to the framebuffer without being culled by
+<em class="xref std std-ref">Depth, Stencil, &amp; Alpha</em> testing or shader KILL instructions.
+The result is an unsigned 64-bit integer.
+This query can be used with <tt class="docutils literal"><span class="pre">render_condition</span></tt>.</p>
+<p>In cases where a boolean result of an occlusion query is enough,
+<tt class="docutils literal"><span class="pre">PIPE_QUERY_OCCLUSION_PREDICATE</span></tt> should be used. It is just like
+<tt class="docutils literal"><span class="pre">PIPE_QUERY_OCCLUSION_COUNTER</span></tt> except that the result is a boolean
+value of FALSE for cases where COUNTER would result in 0 and TRUE
+for all other cases.
+This query can be used with <tt class="docutils literal"><span class="pre">render_condition</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_TIME_ELAPSED</span></tt> returns the amount of time, in nanoseconds,
+the context takes to perform operations.
+The result is an unsigned 64-bit integer.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_TIMESTAMP</span></tt> returns a device/driver internal timestamp,
+scaled to nanoseconds, recorded after all commands issued prior to
+<tt class="docutils literal"><span class="pre">end_query</span></tt> have been processed.
+This query does not require a call to <tt class="docutils literal"><span class="pre">begin_query</span></tt>.
+The result is an unsigned 64-bit integer.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_TIMESTAMP_DISJOINT</span></tt> can be used to check whether the
+internal timer resolution is good enough to distinguish between the
+events at <tt class="docutils literal"><span class="pre">begin_query</span></tt> and <tt class="docutils literal"><span class="pre">end_query</span></tt>.
+The result is a 64-bit integer specifying the timer resolution in Hz,
+followed by a boolean value indicating whether the timer has incremented.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_PRIMITIVES_GENERATED</span></tt> returns a 64-bit integer indicating
+the number of primitives processed by the pipeline.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_PRIMITIVES_EMITTED</span></tt> returns a 64-bit integer indicating
+the number of primitives written to stream output buffers.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_SO_STATISTICS</span></tt> returns 2 64-bit integers corresponding to
+the results of
+<tt class="docutils literal"><span class="pre">PIPE_QUERY_PRIMITIVES_EMITTED</span></tt> and
+<tt class="docutils literal"><span class="pre">PIPE_QUERY_PRIMITIVES_GENERATED</span></tt>, in this order.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_SO_OVERFLOW_PREDICATE</span></tt> returns a boolean value indicating
+whether the stream output targets have overflowed as a result of the
+commands issued between <tt class="docutils literal"><span class="pre">begin_query</span></tt> and <tt class="docutils literal"><span class="pre">end_query</span></tt>.
+This query can be used with <tt class="docutils literal"><span class="pre">render_condition</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_GPU_FINISHED</span></tt> returns a boolean value indicating whether
+all commands issued before <tt class="docutils literal"><span class="pre">end_query</span></tt> have completed. However, this
+does not imply serialization.
+This query does not require a call to <tt class="docutils literal"><span class="pre">begin_query</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">PIPE_QUERY_PIPELINE_STATISTICS</span></tt> returns an array of the following
+64-bit integers:
+Number of vertices read from vertex buffers.
+Number of primitives read from vertex buffers.
+Number of vertex shader threads launched.
+Number of geometry shader threads launched.
+Number of primitives generated by geometry shaders.
+Number of primitives forwarded to the rasterizer.
+Number of primitives rasterized.
+Number of fragment shader threads launched.
+Number of tessellation control shader threads launched.
+Number of tessellation evaluation shader threads launched.
+If a shader type is not supported by the device/driver,
+the corresponding values should be set to 0.</p>
+<p>Gallium does not guarantee the availability of any query types; one must
+always check the capabilities of the <a class="reference internal" href="screen.html#screen"><em>Screen</em></a> first.</p>
+</div>
+<div class="section" id="conditional-rendering">
+<h3>Conditional Rendering<a class="headerlink" href="#conditional-rendering" title="Permalink to this headline">¶</a></h3>
+<p>A drawing command can be skipped depending on the outcome of a query
+(typically an occlusion query).  The <tt class="docutils literal"><span class="pre">render_condition</span></tt> function specifies
+the query which should be checked prior to rendering anything.</p>
+<p>If <tt class="docutils literal"><span class="pre">render_condition</span></tt> is called with <tt class="docutils literal"><span class="pre">query</span></tt> = NULL, conditional
+rendering is disabled and drawing takes place normally.</p>
+<p>If <tt class="docutils literal"><span class="pre">render_condition</span></tt> is called with a non-null <tt class="docutils literal"><span class="pre">query</span></tt> subsequent
+drawing commands will be predicated on the outcome of the query.  If
+the query result is zero subsequent drawing commands will be skipped.</p>
+<p>If <tt class="docutils literal"><span class="pre">mode</span></tt> is PIPE_RENDER_COND_WAIT the driver will wait for the
+query to complete before deciding whether to render.</p>
+<p>If <tt class="docutils literal"><span class="pre">mode</span></tt> is PIPE_RENDER_COND_NO_WAIT and the query has not yet
+completed, the drawing command will be executed normally.  If the query
+has completed, drawing will be predicated on the outcome of the query.</p>
+<p>If <tt class="docutils literal"><span class="pre">mode</span></tt> is PIPE_RENDER_COND_BY_REGION_WAIT or
+PIPE_RENDER_COND_BY_REGION_NO_WAIT rendering will be predicated as above
+for the non-REGION modes but in the case that an occulusion query returns
+a non-zero result, regions which were occluded may be ommitted by subsequent
+drawing commands.  This can result in better performance with some GPUs.
+Normally, if the occlusion query returned a non-zero result subsequent
+drawing happens normally so fragments may be generated, shaded and
+processed even where they&#8217;re known to be obscured.</p>
+</div>
+<div class="section" id="flushing">
+<h3>Flushing<a class="headerlink" href="#flushing" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">flush</span></tt></p>
+</div>
+<div class="section" id="resource-busy-queries">
+<h3>Resource Busy Queries<a class="headerlink" href="#resource-busy-queries" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">is_resource_referenced</span></tt></p>
+</div>
+<div class="section" id="blitting">
+<h3>Blitting<a class="headerlink" href="#blitting" title="Permalink to this headline">¶</a></h3>
+<p>These methods emulate classic blitter controls.</p>
+<p>These methods operate directly on <tt class="docutils literal"><span class="pre">pipe_resource</span></tt> objects, and stand
+apart from any 3D state in the context.  Blitting functionality may be
+moved to a separate abstraction at some point in the future.</p>
+<p><tt class="docutils literal"><span class="pre">resource_copy_region</span></tt> blits a region of a resource to a region of another
+resource, provided that both resources have the same format, or compatible
+formats, i.e., formats for which copying the bytes from the source resource
+unmodified to the destination resource will achieve the same effect of a
+textured quad blitter.. The source and destination may be the same resource,
+but overlapping blits are not permitted.
+This can be considered the equivalent of a CPU memcpy.</p>
+<p><tt class="docutils literal"><span class="pre">blit</span></tt> blits a region of a resource to a region of another resource, including
+scaling, format conversion, and up-/downsampling, as well as
+a destination clip rectangle (scissors).
+As opposed to manually drawing a textured quad, this lets the pipe driver choose
+the optimal method for blitting (like using a special 2D engine), and usually
+offers, for example, accelerated stencil-only copies even where
+PIPE_CAP_SHADER_STENCIL_EXPORT is not available.</p>
+</div>
+<div class="section" id="transfers">
+<h3>Transfers<a class="headerlink" href="#transfers" title="Permalink to this headline">¶</a></h3>
+<p>These methods are used to get data to/from a resource.</p>
+<p><tt class="docutils literal"><span class="pre">get_transfer</span></tt> creates a transfer object.</p>
+<p><tt class="docutils literal"><span class="pre">transfer_destroy</span></tt> destroys the transfer object. May cause
+data to be written to the resource at this point.</p>
+<p><tt class="docutils literal"><span class="pre">transfer_map</span></tt> creates a memory mapping for the transfer object.
+The returned map points to the start of the mapped range according to
+the box region, not the beginning of the resource.</p>
+<p><tt class="docutils literal"><span class="pre">transfer_unmap</span></tt> remove the memory mapping for the transfer object.
+Any pointers into the map should be considered invalid and discarded.</p>
+<p><tt class="docutils literal"><span class="pre">transfer_inline_write</span></tt> performs a simplified transfer for simple writes.
+Basically get_transfer, transfer_map, data write, transfer_unmap, and
+transfer_destroy all in one.</p>
+<p>The box parameter to some of these functions defines a 1D, 2D or 3D
+region of pixels.  This is self-explanatory for 1D, 2D and 3D texture
+targets.</p>
+<p>For PIPE_TEXTURE_1D_ARRAY, the box::y and box::height fields refer to the
+array dimension of the texture.</p>
+<p>For PIPE_TEXTURE_2D_ARRAY, the box::z and box::depth fields refer to the
+array dimension of the texture.</p>
+<p>For PIPE_TEXTURE_CUBE, the box:z and box::depth fields refer to the
+faces of the cube map (z + depth &lt;= 6).</p>
+<div class="section" id="transfer-flush-region">
+<span id="id2"></span><h4>transfer_flush_region<a class="headerlink" href="#transfer-flush-region" title="Permalink to this headline">¶</a></h4>
+<p>If a transfer was created with <tt class="docutils literal"><span class="pre">FLUSH_EXPLICIT</span></tt>, it will not automatically
+be flushed on write or unmap. Flushes must be requested with
+<tt class="docutils literal"><span class="pre">transfer_flush_region</span></tt>. Flush ranges are relative to the mapped range, not
+the beginning of the resource.</p>
+</div>
+<div class="section" id="texture-barrier">
+<h4>texture_barrier<a class="headerlink" href="#texture-barrier" title="Permalink to this headline">¶</a></h4>
+<p>This function flushes all pending writes to the currently-set surfaces and
+invalidates all read caches of the currently-set samplers.</p>
+</div>
+</div>
+<div class="section" id="pipe-transfer">
+<span id="id3"></span><h3>PIPE_TRANSFER<a class="headerlink" href="#pipe-transfer" title="Permalink to this headline">¶</a></h3>
+<p>These flags control the behavior of a transfer object.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_READ</span></tt></dt>
+<dd>Resource contents read back (or accessed directly) at transfer create time.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_WRITE</span></tt></dt>
+<dd>Resource contents will be written back at transfer_destroy time (or modified
+as a result of being accessed directly).</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_MAP_DIRECTLY</span></tt></dt>
+<dd>a transfer should directly map the resource. May return NULL if not supported.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_DISCARD_RANGE</span></tt></dt>
+<dd>The memory within the mapped region is discarded.  Cannot be used with
+<tt class="docutils literal"><span class="pre">PIPE_TRANSFER_READ</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_DISCARD_WHOLE_RESOURCE</span></tt></dt>
+<dd>Discards all memory backing the resource.  It should not be used with
+<tt class="docutils literal"><span class="pre">PIPE_TRANSFER_READ</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_DONTBLOCK</span></tt></dt>
+<dd>Fail if the resource cannot be mapped immediately.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_UNSYNCHRONIZED</span></tt></dt>
+<dd>Do not synchronize pending operations on the resource when mapping. The
+interaction of any writes to the map and any operations pending on the
+resource are undefined. Cannot be used with <tt class="docutils literal"><span class="pre">PIPE_TRANSFER_READ</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">PIPE_TRANSFER_FLUSH_EXPLICIT</span></tt></dt>
+<dd>Written ranges will be notified later with <a class="reference internal" href="#transfer-flush-region"><em>transfer_flush_region</em></a>.
+Cannot be used with <tt class="docutils literal"><span class="pre">PIPE_TRANSFER_READ</span></tt>.</dd>
+</dl>
+</div>
+<div class="section" id="compute-kernel-execution">
+<h3>Compute kernel execution<a class="headerlink" href="#compute-kernel-execution" title="Permalink to this headline">¶</a></h3>
+<p>A compute program can be defined, bound or destroyed using
+<tt class="docutils literal"><span class="pre">create_compute_state</span></tt>, <tt class="docutils literal"><span class="pre">bind_compute_state</span></tt> or
+<tt class="docutils literal"><span class="pre">destroy_compute_state</span></tt> respectively.</p>
+<p>Any of the subroutines contained within the compute program can be
+executed on the device using the <tt class="docutils literal"><span class="pre">launch_grid</span></tt> method.  This method
+will execute as many instances of the program as elements in the
+specified N-dimensional grid, hopefully in parallel.</p>
+<p>The compute program has access to four special resources:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">GLOBAL</span></tt> represents a memory space shared among all the threads
+running on the device.  An arbitrary buffer created with the
+<tt class="docutils literal"><span class="pre">PIPE_BIND_GLOBAL</span></tt> flag can be mapped into it using the
+<tt class="docutils literal"><span class="pre">set_global_binding</span></tt> method.</li>
+<li><tt class="docutils literal"><span class="pre">LOCAL</span></tt> represents a memory space shared among all the threads
+running in the same working group.  The initial contents of this
+resource are undefined.</li>
+<li><tt class="docutils literal"><span class="pre">PRIVATE</span></tt> represents a memory space local to a single thread.
+The initial contents of this resource are undefined.</li>
+<li><tt class="docutils literal"><span class="pre">INPUT</span></tt> represents a read-only memory space that can be
+initialized at <tt class="docutils literal"><span class="pre">launch_grid</span></tt> time.</li>
+</ul>
+<p>These resources use a byte-based addressing scheme, and they can be
+accessed from the compute program by means of the LOAD/STORE TGSI
+opcodes.  Additional resources to be accessed using the same opcodes
+may be specified by the user with the <tt class="docutils literal"><span class="pre">set_compute_resources</span></tt>
+method.</p>
+<p>In addition, normal texture sampling is allowed from the compute
+program: <tt class="docutils literal"><span class="pre">bind_compute_sampler_states</span></tt> may be used to set up texture
+samplers for the compute stage and <tt class="docutils literal"><span class="pre">set_compute_sampler_views</span></tt> may
+be used to bind a number of sampler views to it.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Context</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#cso-state">CSO State</a></li>
+<li><a class="reference internal" href="#resource-binding-state">Resource Binding State</a></li>
+<li><a class="reference internal" href="#non-cso-state">Non-CSO State</a></li>
+<li><a class="reference internal" href="#sampler-views">Sampler Views</a></li>
+<li><a class="reference internal" href="#shader-resources">Shader Resources</a></li>
+<li><a class="reference internal" href="#surfaces">Surfaces</a></li>
+<li><a class="reference internal" href="#stream-output-targets">Stream output targets</a></li>
+<li><a class="reference internal" href="#clearing">Clearing</a></li>
+<li><a class="reference internal" href="#drawing">Drawing</a></li>
+<li><a class="reference internal" href="#queries">Queries</a></li>
+<li><a class="reference internal" href="#conditional-rendering">Conditional Rendering</a></li>
+<li><a class="reference internal" href="#flushing">Flushing</a></li>
+<li><a class="reference internal" href="#resource-busy-queries">Resource Busy Queries</a></li>
+<li><a class="reference internal" href="#blitting">Blitting</a></li>
+<li><a class="reference internal" href="#transfers">Transfers</a><ul>
+<li><a class="reference internal" href="#transfer-flush-region">transfer_flush_region</a></li>
+<li><a class="reference internal" href="#texture-barrier">texture_barrier</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pipe-transfer">PIPE_TRANSFER</a></li>
+<li><a class="reference internal" href="#compute-kernel-execution">Compute kernel execution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="resources.html"
+                        title="previous chapter">Resources and derived objects</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cso.html"
+                        title="next chapter">CSO</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/context.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cso.html" title="CSO"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="resources.html" title="Resources and derived objects"
+             >previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

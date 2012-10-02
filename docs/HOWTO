@@ -1,0 +1,7 @@
+gallium docs are written in rst(restructuredText) files. you need sphinx to build them.
+
+on ubuntu 12-04:
+    apt-get install python-sphinx
+
+and then:
+    make html

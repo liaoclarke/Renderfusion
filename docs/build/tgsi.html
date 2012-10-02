@@ -1,0 +1,2369 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TGSI &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="index.html" />
+    <link rel="next" title="Screen" href="screen.html" />
+    <link rel="prev" title="Debugging" href="debugging.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="screen.html" title="Screen"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="debugging.html" title="Debugging"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tgsi">
+<h1>TGSI<a class="headerlink" href="#tgsi" title="Permalink to this headline">¶</a></h1>
+<p>TGSI, Tungsten Graphics Shader Infrastructure, is an intermediate language
+for describing shaders. Since Gallium is inherently shaderful, shaders are
+an important part of the API. TGSI is the only intermediate representation
+used by all drivers.</p>
+<div class="section" id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
+<p>All TGSI instructions, known as <em>opcodes</em>, operate on arbitrary-precision
+floating-point four-component vectors. An opcode may have up to one
+destination register, known as <em>dst</em>, and between zero and three source
+registers, called <em>src0</em> through <em>src2</em>, or simply <em>src</em> if there is only
+one.</p>
+<p>Some instructions, like <a class="reference internal" href="#opcode-I2F"><tt class="xref std std-opcode docutils literal"><span class="pre">I2F</span></tt></a>, permit re-interpretation of vector
+components as integers. Other instructions permit using registers as
+two-component vectors with double precision; see <em class="xref std std-ref">Double Opcodes</em>.</p>
+<p>When an instruction has a scalar result, the result is usually copied into
+each of the components of <em>dst</em>. When this happens, the result is said to be
+<em>replicated</em> to <em>dst</em>. <a class="reference internal" href="#opcode-RCP"><tt class="xref std std-opcode docutils literal"><span class="pre">RCP</span></tt></a> is one such instruction.</p>
+</div>
+<div class="section" id="instruction-set">
+<h2>Instruction Set<a class="headerlink" href="#instruction-set" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="core-isa">
+<h3>Core ISA<a class="headerlink" href="#core-isa" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes are guaranteed to be available regardless of the driver being
+used.</p>
+<dl class="opcode">
+<dt id="opcode-ARL">
+<tt class="descname">ARL</tt><em class="property"> (Address Register Load)</em><a class="headerlink" href="#opcode-ARL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = \lfloor src.x\rfloor
+
+dst.y = \lfloor src.y\rfloor
+
+dst.z = \lfloor src.z\rfloor
+
+dst.w = \lfloor src.w\rfloor</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MOV">
+<tt class="descname">MOV</tt><em class="property"> (Move)</em><a class="headerlink" href="#opcode-MOV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src.x
+
+dst.y = src.y
+
+dst.z = src.z
+
+dst.w = src.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-LIT">
+<tt class="descname">LIT</tt><em class="property"> (Light Coefficients)</em><a class="headerlink" href="#opcode-LIT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = 1
+
+dst.y = max(src.x, 0)
+
+dst.z = (src.x &gt; 0) ? max(src.y, 0)^{clamp(src.w, -128, 128))} : 0
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-RCP">
+<tt class="descname">RCP</tt><em class="property"> (Reciprocal)</em><a class="headerlink" href="#opcode-RCP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \frac{1}{src.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-RSQ">
+<tt class="descname">RSQ</tt><em class="property"> (Reciprocal Square Root)</em><a class="headerlink" href="#opcode-RSQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \frac{1}{\sqrt{|src.x|}}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-EXP">
+<tt class="descname">EXP</tt><em class="property"> (Approximate Exponential Base 2)</em><a class="headerlink" href="#opcode-EXP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = 2^{\lfloor src.x\rfloor}
+
+dst.y = src.x - \lfloor src.x\rfloor
+
+dst.z = 2^{src.x}
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-LOG">
+<tt class="descname">LOG</tt><em class="property"> (Approximate Logarithm Base 2)</em><a class="headerlink" href="#opcode-LOG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = \lfloor\log_2{|src.x|}\rfloor
+
+dst.y = \frac{|src.x|}{2^{\lfloor\log_2{|src.x|}\rfloor}}
+
+dst.z = \log_2{|src.x|}
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MUL">
+<tt class="descname">MUL</tt><em class="property"> (Multiply)</em><a class="headerlink" href="#opcode-MUL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \times src1.x
+
+dst.y = src0.y \times src1.y
+
+dst.z = src0.z \times src1.z
+
+dst.w = src0.w \times src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ADD">
+<tt class="descname">ADD</tt><em class="property"> (Add)</em><a class="headerlink" href="#opcode-ADD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x + src1.x
+
+dst.y = src0.y + src1.y
+
+dst.z = src0.z + src1.z
+
+dst.w = src0.w + src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DP3">
+<tt class="descname">DP3</tt><em class="property"> (3-component Dot Product)</em><a class="headerlink" href="#opcode-DP3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DP4">
+<tt class="descname">DP4</tt><em class="property"> (4-component Dot Product)</em><a class="headerlink" href="#opcode-DP4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z + src0.w \times src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DST">
+<tt class="descname">DST</tt><em class="property"> (Distance Vector)</em><a class="headerlink" href="#opcode-DST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = 1
+
+dst.y = src0.y \times src1.y
+
+dst.z = src0.z
+
+dst.w = src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MIN">
+<tt class="descname">MIN</tt><em class="property"> (Minimum)</em><a class="headerlink" href="#opcode-MIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = min(src0.x, src1.x)
+
+dst.y = min(src0.y, src1.y)
+
+dst.z = min(src0.z, src1.z)
+
+dst.w = min(src0.w, src1.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MAX">
+<tt class="descname">MAX</tt><em class="property"> (Maximum)</em><a class="headerlink" href="#opcode-MAX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = max(src0.x, src1.x)
+
+dst.y = max(src0.y, src1.y)
+
+dst.z = max(src0.z, src1.z)
+
+dst.w = max(src0.w, src1.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SLT">
+<tt class="descname">SLT</tt><em class="property"> (Set On Less Than)</em><a class="headerlink" href="#opcode-SLT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x &lt; src1.x) ? 1 : 0
+
+dst.y = (src0.y &lt; src1.y) ? 1 : 0
+
+dst.z = (src0.z &lt; src1.z) ? 1 : 0
+
+dst.w = (src0.w &lt; src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SGE">
+<tt class="descname">SGE</tt><em class="property"> (Set On Greater Equal Than)</em><a class="headerlink" href="#opcode-SGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x &gt;= src1.x) ? 1 : 0
+
+dst.y = (src0.y &gt;= src1.y) ? 1 : 0
+
+dst.z = (src0.z &gt;= src1.z) ? 1 : 0
+
+dst.w = (src0.w &gt;= src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MAD">
+<tt class="descname">MAD</tt><em class="property"> (Multiply And Add)</em><a class="headerlink" href="#opcode-MAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \times src1.x + src2.x
+
+dst.y = src0.y \times src1.y + src2.y
+
+dst.z = src0.z \times src1.z + src2.z
+
+dst.w = src0.w \times src1.w + src2.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SUB">
+<tt class="descname">SUB</tt><em class="property"> (Subtract)</em><a class="headerlink" href="#opcode-SUB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x - src1.x
+
+dst.y = src0.y - src1.y
+
+dst.z = src0.z - src1.z
+
+dst.w = src0.w - src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-LRP">
+<tt class="descname">LRP</tt><em class="property"> (Linear Interpolate)</em><a class="headerlink" href="#opcode-LRP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \times src1.x + (1 - src0.x) \times src2.x
+
+dst.y = src0.y \times src1.y + (1 - src0.y) \times src2.y
+
+dst.z = src0.z \times src1.z + (1 - src0.z) \times src2.z
+
+dst.w = src0.w \times src1.w + (1 - src0.w) \times src2.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-CND">
+<tt class="descname">CND</tt><em class="property"> (Condition)</em><a class="headerlink" href="#opcode-CND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src2.x &gt; 0.5) ? src0.x : src1.x
+
+dst.y = (src2.y &gt; 0.5) ? src0.y : src1.y
+
+dst.z = (src2.z &gt; 0.5) ? src0.z : src1.z
+
+dst.w = (src2.w &gt; 0.5) ? src0.w : src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DP2A">
+<tt class="descname">DP2A</tt><em class="property"> (2-component Dot Product And Add)</em><a class="headerlink" href="#opcode-DP2A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \times src1.x + src0.y \times src1.y + src2.x
+
+dst.y = src0.x \times src1.x + src0.y \times src1.y + src2.x
+
+dst.z = src0.x \times src1.x + src0.y \times src1.y + src2.x
+
+dst.w = src0.x \times src1.x + src0.y \times src1.y + src2.x</span></p>
+</div><dl class="opcode">
+<dt id="opcode-FRC">
+<tt class="descname">FRC</tt><em class="property"> (Fraction)</em><a class="headerlink" href="#opcode-FRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src.x - \lfloor src.x\rfloor
+
+dst.y = src.y - \lfloor src.y\rfloor
+
+dst.z = src.z - \lfloor src.z\rfloor
+
+dst.w = src.w - \lfloor src.w\rfloor</span></p>
+</div><dl class="opcode">
+<dt id="opcode-CLAMP">
+<tt class="descname">CLAMP</tt><em class="property"> (Clamp)</em><a class="headerlink" href="#opcode-CLAMP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = clamp(src0.x, src1.x, src2.x)
+
+dst.y = clamp(src0.y, src1.y, src2.y)
+
+dst.z = clamp(src0.z, src1.z, src2.z)
+
+dst.w = clamp(src0.w, src1.w, src2.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-FLR">
+<tt class="descname">FLR</tt><em class="property"> (Floor)</em><a class="headerlink" href="#opcode-FLR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is identical to <a class="reference internal" href="#opcode-ARL"><tt class="xref std std-opcode docutils literal"><span class="pre">ARL</span></tt></a>.</p>
+<div class="math">
+<p><span class="math">dst.x = \lfloor src.x\rfloor
+
+dst.y = \lfloor src.y\rfloor
+
+dst.z = \lfloor src.z\rfloor
+
+dst.w = \lfloor src.w\rfloor</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ROUND">
+<tt class="descname">ROUND</tt><em class="property"> (Round)</em><a class="headerlink" href="#opcode-ROUND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = round(src.x)
+
+dst.y = round(src.y)
+
+dst.z = round(src.z)
+
+dst.w = round(src.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-EX2">
+<tt class="descname">EX2</tt><em class="property"> (Exponential Base 2)</em><a class="headerlink" href="#opcode-EX2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = 2^{src.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-LG2">
+<tt class="descname">LG2</tt><em class="property"> (Logarithm Base 2)</em><a class="headerlink" href="#opcode-LG2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \log_2{src.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-POW">
+<tt class="descname">POW</tt><em class="property"> (Power)</em><a class="headerlink" href="#opcode-POW" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = src0.x^{src1.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-XPD">
+<tt class="descname">XPD</tt><em class="property"> (Cross Product)</em><a class="headerlink" href="#opcode-XPD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.y \times src1.z - src1.y \times src0.z
+
+dst.y = src0.z \times src1.x - src1.z \times src0.x
+
+dst.z = src0.x \times src1.y - src1.x \times src0.y
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ABS">
+<tt class="descname">ABS</tt><em class="property"> (Absolute)</em><a class="headerlink" href="#opcode-ABS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = |src.x|
+
+dst.y = |src.y|
+
+dst.z = |src.z|
+
+dst.w = |src.w|</span></p>
+</div><dl class="opcode">
+<dt id="opcode-RCC">
+<tt class="descname">RCC</tt><em class="property"> (Reciprocal Clamped)</em><a class="headerlink" href="#opcode-RCC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<p>XXX cleanup on aisle three</p>
+<div class="math">
+<p><span class="math">dst = (1 / src.x) &gt; 0 ? clamp(1 / src.x, 5.42101e-020, 1.884467e+019) : clamp(1 / src.x, -1.884467e+019, -5.42101e-020)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DPH">
+<tt class="descname">DPH</tt><em class="property"> (Homogeneous Dot Product)</em><a class="headerlink" href="#opcode-DPH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z + src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-COS">
+<tt class="descname">COS</tt><em class="property"> (Cosine)</em><a class="headerlink" href="#opcode-COS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \cos{src.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DDX">
+<tt class="descname">DDX</tt><em class="property"> (Derivative Relative To X)</em><a class="headerlink" href="#opcode-DDX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = partialx(src.x)
+
+dst.y = partialx(src.y)
+
+dst.z = partialx(src.z)
+
+dst.w = partialx(src.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DDY">
+<tt class="descname">DDY</tt><em class="property"> (Derivative Relative To Y)</em><a class="headerlink" href="#opcode-DDY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = partialy(src.x)
+
+dst.y = partialy(src.y)
+
+dst.z = partialy(src.z)
+
+dst.w = partialy(src.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-KILP">
+<tt class="descname">KILP</tt><em class="property"> (Predicated Discard)</em><a class="headerlink" href="#opcode-KILP" title="Permalink to this definition">¶</a></dt>
+<dd><p>discard</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-PK2H">
+<tt class="descname">PK2H</tt><em class="property"> (Pack Two 16-bit Floats)</em><a class="headerlink" href="#opcode-PK2H" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-PK2US">
+<tt class="descname">PK2US</tt><em class="property"> (Pack Two Unsigned 16-bit Scalars)</em><a class="headerlink" href="#opcode-PK2US" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-PK4B">
+<tt class="descname">PK4B</tt><em class="property"> (Pack Four Signed 8-bit Scalars)</em><a class="headerlink" href="#opcode-PK4B" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-PK4UB">
+<tt class="descname">PK4UB</tt><em class="property"> (Pack Four Unsigned 8-bit Scalars)</em><a class="headerlink" href="#opcode-PK4UB" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-RFL">
+<tt class="descname">RFL</tt><em class="property"> (Reflection Vector)</em><a class="headerlink" href="#opcode-RFL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = 2 \times (src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z) / (src0.x \times src0.x + src0.y \times src0.y + src0.z \times src0.z) \times src0.x - src1.x
+
+dst.y = 2 \times (src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z) / (src0.x \times src0.x + src0.y \times src0.y + src0.z \times src0.z) \times src0.y - src1.y
+
+dst.z = 2 \times (src0.x \times src1.x + src0.y \times src1.y + src0.z \times src1.z) / (src0.x \times src0.x + src0.y \times src0.y + src0.z \times src0.z) \times src0.z - src1.z
+
+dst.w = 1</span></p>
+</div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-SEQ">
+<tt class="descname">SEQ</tt><em class="property"> (Set On Equal)</em><a class="headerlink" href="#opcode-SEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x == src1.x) ? 1 : 0
+
+dst.y = (src0.y == src1.y) ? 1 : 0
+
+dst.z = (src0.z == src1.z) ? 1 : 0
+
+dst.w = (src0.w == src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SFL">
+<tt class="descname">SFL</tt><em class="property"> (Set On False)</em><a class="headerlink" href="#opcode-SFL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = 0</span></p>
+</div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-SGT">
+<tt class="descname">SGT</tt><em class="property"> (Set On Greater Than)</em><a class="headerlink" href="#opcode-SGT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x &gt; src1.x) ? 1 : 0
+
+dst.y = (src0.y &gt; src1.y) ? 1 : 0
+
+dst.z = (src0.z &gt; src1.z) ? 1 : 0
+
+dst.w = (src0.w &gt; src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SIN">
+<tt class="descname">SIN</tt><em class="property"> (Sine)</em><a class="headerlink" href="#opcode-SIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \sin{src.x}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SLE">
+<tt class="descname">SLE</tt><em class="property"> (Set On Less Equal Than)</em><a class="headerlink" href="#opcode-SLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x &lt;= src1.x) ? 1 : 0
+
+dst.y = (src0.y &lt;= src1.y) ? 1 : 0
+
+dst.z = (src0.z &lt;= src1.z) ? 1 : 0
+
+dst.w = (src0.w &lt;= src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SNE">
+<tt class="descname">SNE</tt><em class="property"> (Set On Not Equal)</em><a class="headerlink" href="#opcode-SNE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x != src1.x) ? 1 : 0
+
+dst.y = (src0.y != src1.y) ? 1 : 0
+
+dst.z = (src0.z != src1.z) ? 1 : 0
+
+dst.w = (src0.w != src1.w) ? 1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-STR">
+<tt class="descname">STR</tt><em class="property"> (Set On True)</em><a class="headerlink" href="#opcode-STR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TEX">
+<tt class="descname">TEX</tt><em class="property"> (Texture Lookup)</em><a class="headerlink" href="#opcode-TEX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">coord = src0
+
+bias = 0.0
+
+dst = texture_sample(unit, coord, bias)
+
+for array textures src0.y contains the slice for 1D,
+and src0.z contain the slice for 2D.
+for shadow textures with no arrays, src0.z contains
+the reference value.
+for shadow textures with arrays, src0.z contains
+the reference value for 1D arrays, and src0.w contains
+the reference value for 2D arrays.
+There is no way to pass a bias in the .w value for
+shadow arrays, and GLSL doesn't allow this.
+GLSL does allow cube shadows maps to take a bias value,
+and we have to determine how this will look in TGSI.</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TXD">
+<tt class="descname">TXD</tt><em class="property"> (Texture Lookup with Derivatives)</em><a class="headerlink" href="#opcode-TXD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">coord = src0
+
+ddx = src1
+
+ddy = src2
+
+bias = 0.0
+
+dst = texture_sample_deriv(unit, coord, bias, ddx, ddy)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TXP">
+<tt class="descname">TXP</tt><em class="property"> (Projective Texture Lookup)</em><a class="headerlink" href="#opcode-TXP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">coord.x = src0.x / src.w
+
+coord.y = src0.y / src.w
+
+coord.z = src0.z / src.w
+
+coord.w = src0.w
+
+bias = 0.0
+
+dst = texture_sample(unit, coord, bias)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-UP2H">
+<tt class="descname">UP2H</tt><em class="property"> (Unpack Two 16-Bit Floats)</em><a class="headerlink" href="#opcode-UP2H" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-UP2US">
+<tt class="descname">UP2US</tt><em class="property"> (Unpack Two Unsigned 16-Bit Scalars)</em><a class="headerlink" href="#opcode-UP2US" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-UP4B">
+<tt class="descname">UP4B</tt><em class="property"> (Unpack Four Signed 8-Bit Values)</em><a class="headerlink" href="#opcode-UP4B" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-UP4UB">
+<tt class="descname">UP4UB</tt><em class="property"> (Unpack Four Unsigned 8-Bit Scalars)</em><a class="headerlink" href="#opcode-UP4UB" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-X2D">
+<tt class="descname">X2D</tt><em class="property"> (2D Coordinate Transformation)</em><a class="headerlink" href="#opcode-X2D" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x + src1.x \times src2.x + src1.y \times src2.y
+
+dst.y = src0.y + src1.x \times src2.z + src1.y \times src2.w
+
+dst.z = src0.x + src1.x \times src2.x + src1.y \times src2.y
+
+dst.w = src0.y + src1.x \times src2.z + src1.y \times src2.w</span></p>
+</div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-ARA">
+<tt class="descname">ARA</tt><em class="property"> (Address Register Add)</em><a class="headerlink" href="#opcode-ARA" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-ARR">
+<tt class="descname">ARR</tt><em class="property"> (Address Register Load With Round)</em><a class="headerlink" href="#opcode-ARR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = round(src.x)
+
+dst.y = round(src.y)
+
+dst.z = round(src.z)
+
+dst.w = round(src.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-BRA">
+<tt class="descname">BRA</tt><em class="property"> (Branch)</em><a class="headerlink" href="#opcode-BRA" title="Permalink to this definition">¶</a></dt>
+<dd><p>pc = target</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-CAL">
+<tt class="descname">CAL</tt><em class="property"> (Subroutine Call)</em><a class="headerlink" href="#opcode-CAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>push(pc)
+pc = target</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-RET">
+<tt class="descname">RET</tt><em class="property"> (Subroutine Call Return)</em><a class="headerlink" href="#opcode-RET" title="Permalink to this definition">¶</a></dt>
+<dd><p>pc = pop()</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SSG">
+<tt class="descname">SSG</tt><em class="property"> (Set Sign)</em><a class="headerlink" href="#opcode-SSG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src.x &gt; 0) ? 1 : (src.x &lt; 0) ? -1 : 0
+
+dst.y = (src.y &gt; 0) ? 1 : (src.y &lt; 0) ? -1 : 0
+
+dst.z = (src.z &gt; 0) ? 1 : (src.z &lt; 0) ? -1 : 0
+
+dst.w = (src.w &gt; 0) ? 1 : (src.w &lt; 0) ? -1 : 0</span></p>
+</div><dl class="opcode">
+<dt id="opcode-CMP">
+<tt class="descname">CMP</tt><em class="property"> (Compare)</em><a class="headerlink" href="#opcode-CMP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (src0.x &lt; 0) ? src1.x : src2.x
+
+dst.y = (src0.y &lt; 0) ? src1.y : src2.y
+
+dst.z = (src0.z &lt; 0) ? src1.z : src2.z
+
+dst.w = (src0.w &lt; 0) ? src1.w : src2.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-KIL">
+<tt class="descname">KIL</tt><em class="property"> (Conditional Discard)</em><a class="headerlink" href="#opcode-KIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">if (src.x &lt; 0 || src.y &lt; 0 || src.z &lt; 0 || src.w &lt; 0)
+  discard
+endif</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SCS">
+<tt class="descname">SCS</tt><em class="property"> (Sine Cosine)</em><a class="headerlink" href="#opcode-SCS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = \cos{src.x}
+
+dst.y = \sin{src.x}
+
+dst.z = 0
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TXB">
+<tt class="descname">TXB</tt><em class="property"> (Texture Lookup With Bias)</em><a class="headerlink" href="#opcode-TXB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">coord.x = src.x
+
+coord.y = src.y
+
+coord.z = src.z
+
+coord.w = 1.0
+
+bias = src.z
+
+dst = texture_sample(unit, coord, bias)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-NRM">
+<tt class="descname">NRM</tt><em class="property"> (3-component Vector Normalise)</em><a class="headerlink" href="#opcode-NRM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src.x / (src.x \times src.x + src.y \times src.y + src.z \times src.z)
+
+dst.y = src.y / (src.x \times src.x + src.y \times src.y + src.z \times src.z)
+
+dst.z = src.z / (src.x \times src.x + src.y \times src.y + src.z \times src.z)
+
+dst.w = 1</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DIV">
+<tt class="descname">DIV</tt><em class="property"> (Divide)</em><a class="headerlink" href="#opcode-DIV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = \frac{src0.x}{src1.x}
+
+dst.y = \frac{src0.y}{src1.y}
+
+dst.z = \frac{src0.z}{src1.z}
+
+dst.w = \frac{src0.w}{src1.w}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DP2">
+<tt class="descname">DP2</tt><em class="property"> (2-component Dot Product)</em><a class="headerlink" href="#opcode-DP2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = src0.x \times src1.x + src0.y \times src1.y</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TXL">
+<tt class="descname">TXL</tt><em class="property"> (Texture Lookup With explicit LOD)</em><a class="headerlink" href="#opcode-TXL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">coord.x = src0.x
+
+coord.y = src0.y
+
+coord.z = src0.z
+
+coord.w = 1.0
+
+lod = src0.w
+
+dst = texture_sample(unit, coord, lod)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-BRK">
+<tt class="descname">BRK</tt><em class="property"> (Break)</em><a class="headerlink" href="#opcode-BRK" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-IF">
+<tt class="descname">IF</tt><em class="property"> (If)</em><a class="headerlink" href="#opcode-IF" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-ELSE">
+<tt class="descname">ELSE</tt><em class="property"> (Else)</em><a class="headerlink" href="#opcode-ELSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-ENDIF">
+<tt class="descname">ENDIF</tt><em class="property"> (End If)</em><a class="headerlink" href="#opcode-ENDIF" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-PUSHA">
+<tt class="descname">PUSHA</tt><em class="property"> (Push Address Register On Stack)</em><a class="headerlink" href="#opcode-PUSHA" title="Permalink to this definition">¶</a></dt>
+<dd><p>push(src.x)
+push(src.y)
+push(src.z)
+push(src.w)</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for cleanup.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+<dl class="opcode">
+<dt id="opcode-POPA">
+<tt class="descname">POPA</tt><em class="property"> (Pop Address Register From Stack)</em><a class="headerlink" href="#opcode-POPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>dst.w = pop()
+dst.z = pop()
+dst.y = pop()
+dst.x = pop()</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for cleanup.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Considered for removal.</p>
+</div>
+</div>
+<div class="section" id="compute-isa">
+<h3>Compute ISA<a class="headerlink" href="#compute-isa" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes are primarily provided for special-use computational shaders.
+Support for these opcodes indicated by a special pipe capability bit (TBD).</p>
+<p>XXX so let&#8217;s discuss it, yeah?</p>
+<dl class="opcode">
+<dt id="opcode-CEIL">
+<tt class="descname">CEIL</tt><em class="property"> (Ceiling)</em><a class="headerlink" href="#opcode-CEIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = \lceil src.x\rceil
+
+dst.y = \lceil src.y\rceil
+
+dst.z = \lceil src.z\rceil
+
+dst.w = \lceil src.w\rceil</span></p>
+</div><dl class="opcode">
+<dt id="opcode-I2F">
+<tt class="descname">I2F</tt><em class="property"> (Integer To Float)</em><a class="headerlink" href="#opcode-I2F" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = (float) src.x
+
+dst.y = (float) src.y
+
+dst.z = (float) src.z
+
+dst.w = (float) src.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-NOT">
+<tt class="descname">NOT</tt><em class="property"> (Bitwise Not)</em><a class="headerlink" href="#opcode-NOT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = ~src.x
+
+dst.y = ~src.y
+
+dst.z = ~src.z
+
+dst.w = ~src.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TRUNC">
+<tt class="descname">TRUNC</tt><em class="property"> (Truncate)</em><a class="headerlink" href="#opcode-TRUNC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = trunc(src.x)
+
+dst.y = trunc(src.y)
+
+dst.z = trunc(src.z)
+
+dst.w = trunc(src.w)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SHL">
+<tt class="descname">SHL</tt><em class="property"> (Shift Left)</em><a class="headerlink" href="#opcode-SHL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x &lt;&lt; src1.x
+
+dst.y = src0.y &lt;&lt; src1.x
+
+dst.z = src0.z &lt;&lt; src1.x
+
+dst.w = src0.w &lt;&lt; src1.x</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SHR">
+<tt class="descname">SHR</tt><em class="property"> (Shift Right)</em><a class="headerlink" href="#opcode-SHR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x &gt;&gt; src1.x
+
+dst.y = src0.y &gt;&gt; src1.x
+
+dst.z = src0.z &gt;&gt; src1.x
+
+dst.w = src0.w &gt;&gt; src1.x</span></p>
+</div><dl class="opcode">
+<dt id="opcode-AND">
+<tt class="descname">AND</tt><em class="property"> (Bitwise And)</em><a class="headerlink" href="#opcode-AND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x &amp; src1.x
+
+dst.y = src0.y &amp; src1.y
+
+dst.z = src0.z &amp; src1.z
+
+dst.w = src0.w &amp; src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-OR">
+<tt class="descname">OR</tt><em class="property"> (Bitwise Or)</em><a class="headerlink" href="#opcode-OR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x | src1.x
+
+dst.y = src0.y | src1.y
+
+dst.z = src0.z | src1.z
+
+dst.w = src0.w | src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-MOD">
+<tt class="descname">MOD</tt><em class="property"> (Modulus)</em><a class="headerlink" href="#opcode-MOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \bmod src1.x
+
+dst.y = src0.y \bmod src1.y
+
+dst.z = src0.z \bmod src1.z
+
+dst.w = src0.w \bmod src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-XOR">
+<tt class="descname">XOR</tt><em class="property"> (Bitwise Xor)</em><a class="headerlink" href="#opcode-XOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x \oplus src1.x
+
+dst.y = src0.y \oplus src1.y
+
+dst.z = src0.z \oplus src1.z
+
+dst.w = src0.w \oplus src1.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-UCMP">
+<tt class="descname">UCMP</tt><em class="property"> (Integer Conditional Move)</em><a class="headerlink" href="#opcode-UCMP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = src0.x ? src1.x : src2.x
+
+dst.y = src0.y ? src1.y : src2.y
+
+dst.z = src0.z ? src1.z : src2.z
+
+dst.w = src0.w ? src1.w : src2.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-UARL">
+<tt class="descname">UARL</tt><em class="property"> (Integer Address Register Load)</em><a class="headerlink" href="#opcode-UARL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the contents of the source register, assumed to be an integer, into the
+destination register, which is assumed to be an address (ADDR) register.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-IABS">
+<tt class="descname">IABS</tt><em class="property"> (Integer Absolute Value)</em><a class="headerlink" href="#opcode-IABS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = |src.x|
+
+dst.y = |src.y|
+
+dst.z = |src.z|
+
+dst.w = |src.w|</span></p>
+</div><dl class="opcode">
+<dt id="opcode-SAD">
+<tt class="descname">SAD</tt><em class="property"> (Sum Of Absolute Differences)</em><a class="headerlink" href="#opcode-SAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.x = |src0.x - src1.x| + src2.x
+
+dst.y = |src0.y - src1.y| + src2.y
+
+dst.z = |src0.z - src1.z| + src2.z
+
+dst.w = |src0.w - src1.w| + src2.w</span></p>
+</div><dl class="opcode">
+<dt id="opcode-TXF">
+<tt class="descname">TXF</tt><em class="property"> (Texel Fetch (as per NV_gpu_shader4), extract a single texel)</em><a class="headerlink" href="#opcode-TXF" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">from a specified texture image. The source sampler may</tt></dt>
+<dt>
+<tt class="descname">not be a CUBE or SHADOW.</tt></dt>
+<dt id="opcode-SRC 0 IS A FOUR">
+<tt class="descname">SRC 0 IS A FOUR</tt><em class="property"> (component signed integer vector used to)</em><a class="headerlink" href="#opcode-SRC 0 IS A FOUR" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">identify the single texel accessed. 3 components + level.</tt></dt>
+<dt>
+<tt class="descname">src 1 is a 3 component constant signed integer vector,</tt></dt>
+<dt>
+<tt class="descname">with each component only have a range of</tt></dt>
+<dt id="opcode-">
+<tt class="descname"></tt><em class="property"> (8..+8 (hw only seems to deal with this range, interface)</em><a class="headerlink" href="#opcode-" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">allows for up to unsigned int).</tt></dt>
+<dt>
+<tt class="descname">TXF(uint_vec coord, int_vec offset).</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-TXQ">
+<tt class="descname">TXQ</tt><em class="property"> (Texture Size Query (as per NV_gpu_program4))</em><a class="headerlink" href="#opcode-TXQ" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">retrieve the dimensions of the texture</tt></dt>
+<dt>
+<tt class="descname">depending on the target. For 1D (width), 2D/RECT/CUBE</tt></dt>
+<dt>
+<tt class="descname">(width, height), 3D (width, height, depth),</tt></dt>
+<dt>
+<tt class="descname">1D array (width, layers), 2D array (width, height, layers)</tt></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">lod = src0
+
+dst.x = texture_width(unit, lod)
+
+dst.y = texture_height(unit, lod)
+
+dst.z = texture_depth(unit, lod)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-CONT">
+<tt class="descname">CONT</tt><em class="property"> (Continue)</em><a class="headerlink" href="#opcode-CONT" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Support for CONT is determined by a special capability bit,
+<tt class="docutils literal"><span class="pre">TGSI_CONT_SUPPORTED</span></tt>. See <a class="reference internal" href="screen.html#screen"><em>Screen</em></a> for more information.</p>
+</div>
+</div>
+<div class="section" id="geometry-isa">
+<h3>Geometry ISA<a class="headerlink" href="#geometry-isa" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes are only supported in geometry shaders; they have no meaning
+in any other type of shader.</p>
+<dl class="opcode">
+<dt id="opcode-EMIT">
+<tt class="descname">EMIT</tt><em class="property"> (Emit)</em><a class="headerlink" href="#opcode-EMIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-ENDPRIM">
+<tt class="descname">ENDPRIM</tt><em class="property"> (End Primitive)</em><a class="headerlink" href="#opcode-ENDPRIM" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+</div>
+<div class="section" id="glsl-isa">
+<h3>GLSL ISA<a class="headerlink" href="#glsl-isa" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes are part of <a class="reference internal" href="glossary.html#term-glsl"><em class="xref std std-term">GLSL</em></a>&#8216;s opcode set. Support for these
+opcodes is determined by a special capability bit, <tt class="docutils literal"><span class="pre">GLSL</span></tt>.</p>
+<dl class="opcode">
+<dt id="opcode-BGNLOOP">
+<tt class="descname">BGNLOOP</tt><em class="property"> (Begin a Loop)</em><a class="headerlink" href="#opcode-BGNLOOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-BGNSUB">
+<tt class="descname">BGNSUB</tt><em class="property"> (Begin Subroutine)</em><a class="headerlink" href="#opcode-BGNSUB" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-ENDLOOP">
+<tt class="descname">ENDLOOP</tt><em class="property"> (End a Loop)</em><a class="headerlink" href="#opcode-ENDLOOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-ENDSUB">
+<tt class="descname">ENDSUB</tt><em class="property"> (End Subroutine)</em><a class="headerlink" href="#opcode-ENDSUB" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-NOP">
+<tt class="descname">NOP</tt><em class="property"> (No Operation)</em><a class="headerlink" href="#opcode-NOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do nothing.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-NRM4">
+<tt class="descname">NRM4</tt><em class="property"> (4-component Vector Normalise)</em><a class="headerlink" href="#opcode-NRM4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This instruction replicates its result.</p>
+<div class="math">
+<p><span class="math">dst = \frac{src.x}{src.x \times src.x + src.y \times src.y + src.z \times src.z + src.w \times src.w}</span></p>
+</div></div>
+<div class="section" id="ps-2-x">
+<h3>ps_2_x<a class="headerlink" href="#ps-2-x" title="Permalink to this headline">¶</a></h3>
+<p>XXX wait what</p>
+<dl class="opcode">
+<dt id="opcode-CALLNZ">
+<tt class="descname">CALLNZ</tt><em class="property"> (Subroutine Call If Not Zero)</em><a class="headerlink" href="#opcode-CALLNZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-IFC">
+<tt class="descname">IFC</tt><em class="property"> (If)</em><a class="headerlink" href="#opcode-IFC" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-BREAKC">
+<tt class="descname">BREAKC</tt><em class="property"> (Break Conditional)</em><a class="headerlink" href="#opcode-BREAKC" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+</div>
+<div class="section" id="double-isa">
+<span id="doubleopcodes"></span><h3>Double ISA<a class="headerlink" href="#double-isa" title="Permalink to this headline">¶</a></h3>
+<p>The double-precision opcodes reinterpret four-component vectors into
+two-component vectors with doubled precision in each component.</p>
+<p>Support for these opcodes is XXX undecided. :T</p>
+<dl class="opcode">
+<dt id="opcode-DADD">
+<tt class="descname">DADD</tt><em class="property"> (Add)</em><a class="headerlink" href="#opcode-DADD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy + src1.xy
+
+dst.zw = src0.zw + src1.zw</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DDIV">
+<tt class="descname">DDIV</tt><em class="property"> (Divide)</em><a class="headerlink" href="#opcode-DDIV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy / src1.xy
+
+dst.zw = src0.zw / src1.zw</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DSEQ">
+<tt class="descname">DSEQ</tt><em class="property"> (Set on Equal)</em><a class="headerlink" href="#opcode-DSEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy == src1.xy ? 1.0F : 0.0F
+
+dst.zw = src0.zw == src1.zw ? 1.0F : 0.0F</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DSLT">
+<tt class="descname">DSLT</tt><em class="property"> (Set on Less than)</em><a class="headerlink" href="#opcode-DSLT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy &lt; src1.xy ? 1.0F : 0.0F
+
+dst.zw = src0.zw &lt; src1.zw ? 1.0F : 0.0F</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DFRAC">
+<tt class="descname">DFRAC</tt><em class="property"> (Fraction)</em><a class="headerlink" href="#opcode-DFRAC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src.xy - \lfloor src.xy\rfloor
+
+dst.zw = src.zw - \lfloor src.zw\rfloor</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DFRACEXP">
+<tt class="descname">DFRACEXP</tt><em class="property"> (Convert Number to Fractional and Integral Components)</em><a class="headerlink" href="#opcode-DFRACEXP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Like the <tt class="docutils literal"><span class="pre">frexp()</span></tt> routine in many math libraries, this opcode stores the
+exponent of its source to <tt class="docutils literal"><span class="pre">dst0</span></tt>, and the significand to <tt class="docutils literal"><span class="pre">dst1</span></tt>, such that
+<span class="math">dst1 \times 2^{dst0} = src</span> .</p>
+<div class="math">
+<p><span class="math">dst0.xy = exp(src.xy)
+
+dst1.xy = frac(src.xy)
+
+dst0.zw = exp(src.zw)
+
+dst1.zw = frac(src.zw)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DLDEXP">
+<tt class="descname">DLDEXP</tt><em class="property"> (Multiply Number by Integral Power of 2)</em><a class="headerlink" href="#opcode-DLDEXP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This opcode is the inverse of <a class="reference internal" href="#opcode-DFRACEXP"><tt class="xref std std-opcode docutils literal"><span class="pre">DFRACEXP</span></tt></a>.</p>
+<div class="math">
+<p><span class="math">dst.xy = src0.xy \times 2^{src1.xy}
+
+dst.zw = src0.zw \times 2^{src1.zw}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DMIN">
+<tt class="descname">DMIN</tt><em class="property"> (Minimum)</em><a class="headerlink" href="#opcode-DMIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = min(src0.xy, src1.xy)
+
+dst.zw = min(src0.zw, src1.zw)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DMAX">
+<tt class="descname">DMAX</tt><em class="property"> (Maximum)</em><a class="headerlink" href="#opcode-DMAX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = max(src0.xy, src1.xy)
+
+dst.zw = max(src0.zw, src1.zw)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DMUL">
+<tt class="descname">DMUL</tt><em class="property"> (Multiply)</em><a class="headerlink" href="#opcode-DMUL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy \times src1.xy
+
+dst.zw = src0.zw \times src1.zw</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DMAD">
+<tt class="descname">DMAD</tt><em class="property"> (Multiply And Add)</em><a class="headerlink" href="#opcode-DMAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = src0.xy \times src1.xy + src2.xy
+
+dst.zw = src0.zw \times src1.zw + src2.zw</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DRCP">
+<tt class="descname">DRCP</tt><em class="property"> (Reciprocal)</em><a class="headerlink" href="#opcode-DRCP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = \frac{1}{src.xy}
+
+dst.zw = \frac{1}{src.zw}</span></p>
+</div><dl class="opcode">
+<dt id="opcode-DSQRT">
+<tt class="descname">DSQRT</tt><em class="property"> (Square Root)</em><a class="headerlink" href="#opcode-DSQRT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="math">
+<p><span class="math">dst.xy = \sqrt{src.xy}
+
+dst.zw = \sqrt{src.zw}</span></p>
+</div></div>
+<div class="section" id="resource-sampling-opcodes">
+<span id="samplingopcodes"></span><h3>Resource Sampling Opcodes<a class="headerlink" href="#resource-sampling-opcodes" title="Permalink to this headline">¶</a></h3>
+<p>Those opcodes follow very closely semantics of the respective Direct3D
+instructions. If in doubt double check Direct3D documentation.</p>
+<dl class="opcode">
+<dt id="opcode-SAMPLE">
+<tt class="descname">SAMPLE</tt><em class="property"> (Using provided address, sample data from the)</em><a class="headerlink" href="#opcode-SAMPLE" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">specified texture using the filtering mode identified</tt></dt>
+<dt>
+<tt class="descname">by the gven sampler. The source data may come from</tt></dt>
+<dt>
+<tt class="descname">any resource type other than buffers.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE dst, address, sampler_view, sampler</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE TEMP[0], TEMP[1], SVIEW[0], SAMP[0]</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_I">
+<tt class="descname">SAMPLE_I</tt><em class="property"> (Simplified alternative to the SAMPLE instruction.)</em><a class="headerlink" href="#opcode-SAMPLE_I" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">Using the provided integer address, SAMPLE_I fetches data</tt></dt>
+<dt>
+<tt class="descname">from the specified sampler view without any filtering.</tt></dt>
+<dt>
+<tt class="descname">The source data may come from any resource type other</tt></dt>
+<dt>
+<tt class="descname">than CUBE.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_I dst, address, sampler_view</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_I TEMP[0], TEMP[1], SVIEW[0]</tt></dt>
+<dt>
+<tt class="descname">The 'address' is specified as unsigned integers. If the</tt></dt>
+<dt id="opcode-'ADDRESS' IS OUT OF RANGE [0...(# TEXELS">
+<tt class="descname">'ADDRESS' IS OUT OF RANGE [0...(# TEXELS</tt><em class="property"> (1)] the)</em><a class="headerlink" href="#opcode-'ADDRESS' IS OUT OF RANGE [0...(# TEXELS" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">result of the fetch is always 0 in all components.</tt></dt>
+<dt>
+<tt class="descname">As such the instruction doesn't honor address wrap</tt></dt>
+<dt>
+<tt class="descname">modes, in cases where that behavior is desirable</tt></dt>
+<dt>
+<tt class="descname">'SAMPLE' instruction should be used.</tt></dt>
+<dt>
+<tt class="descname">address.w always provides an unsigned integer mipmap</tt></dt>
+<dt>
+<tt class="descname">level. If the value is out of the range then the</tt></dt>
+<dt>
+<tt class="descname">instruction always returns 0 in all components.</tt></dt>
+<dt>
+<tt class="descname">address.yz are ignored for buffers and 1d textures.</tt></dt>
+<dt>
+<tt class="descname">address.z is ignored for 1d texture arrays and 2d</tt></dt>
+<dt>
+<tt class="descname">textures.</tt></dt>
+<dt>
+<tt class="descname">For 1D texture arrays address.y provides the array</tt></dt>
+<dt>
+<tt class="descname">index (also as unsigned integer). If the value is</tt></dt>
+<dt>
+<tt class="descname">out of the range of available array indices</tt></dt>
+<dt id="opcode-[0... (ARRAY SIZE">
+<tt class="descname">[0... (ARRAY SIZE</tt><em class="property"> (1)] then the opcode always returns)</em><a class="headerlink" href="#opcode-[0... (ARRAY SIZE" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">0 in all components.</tt></dt>
+<dt>
+<tt class="descname">For 2D texture arrays address.z provides the array</tt></dt>
+<dt>
+<tt class="descname">index, otherwise it exhibits the same behavior as in</tt></dt>
+<dt>
+<tt class="descname">the case for 1D texture arrays.</tt></dt>
+<dt>
+<tt class="descname">The exact semantics of the source address are presented</tt></dt>
+<dt>
+<tt class="descname">in the table below:</tt></dt>
+<dt>
+<tt class="descname">resource type         X     Y     Z       W</tt></dt>
+<dt id="opcode-">
+<tt class="descname"></tt><em class="property"> (------------         ------------------------)</em><a class="headerlink" href="#opcode-" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">PIPE_BUFFER           x                ignored</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_1D       x                  mpl</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_2D       x     y            mpl</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_3D       x     y     z      mpl</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_RECT     x     y            mpl</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_CUBE     not allowed as source</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_1D_ARRAY x    idx           mpl</tt></dt>
+<dt>
+<tt class="descname">PIPE_TEXTURE_2D_ARRAY x     y    idx     mpl</tt></dt>
+<dd><p>Where &#8216;mpl&#8217; is a mipmap level and &#8216;idx&#8217; is the
+array index.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_I_MS">
+<tt class="descname">SAMPLE_I_MS</tt><em class="property"> (Just like SAMPLE_I but allows fetch data from)</em><a class="headerlink" href="#opcode-SAMPLE_I_MS" title="Permalink to this definition">¶</a></dt>
+<dt id="opcode-MULTI">
+<tt class="descname">MULTI</tt><em class="property"> (sampled surfaces.)</em><a class="headerlink" href="#opcode-MULTI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_B">
+<tt class="descname">SAMPLE_B</tt><em class="property"> (Just like the SAMPLE instruction with the)</em><a class="headerlink" href="#opcode-SAMPLE_B" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">exception that an additiona bias is applied to the</tt></dt>
+<dt>
+<tt class="descname">level of detail computed as part of the instruction</tt></dt>
+<dt>
+<tt class="descname">execution.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_B dst, address, sampler_view, sampler, lod_bias</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_B TEMP[0], TEMP[1], SVIEW[0], SAMP[0], TEMP[2].x</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_C">
+<tt class="descname">SAMPLE_C</tt><em class="property"> (Similar to the SAMPLE instruction but it)</em><a class="headerlink" href="#opcode-SAMPLE_C" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">performs a comparison filter. The operands to SAMPLE_C</tt></dt>
+<dt>
+<tt class="descname">are identical to SAMPLE, except that tere is an additional</tt></dt>
+<dt>
+<tt class="descname">float32 operand, reference value, which must be a register</tt></dt>
+<dt id="opcode-WITH SINGLE">
+<tt class="descname">WITH SINGLE</tt><em class="property"> (component, or a scalar literal.)</em><a class="headerlink" href="#opcode-WITH SINGLE" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">SAMPLE_C makes the hardware use the current samplers</tt></dt>
+<dt>
+<tt class="descname">compare_func (in pipe_sampler_state) to compare</tt></dt>
+<dt>
+<tt class="descname">reference value against the red component value for the</tt></dt>
+<dt>
+<tt class="descname">surce resource at each texel that the currently configured</tt></dt>
+<dt>
+<tt class="descname">texture filter covers based on the provided coordinates.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_C dst, address, sampler_view.r, sampler, ref_value</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_C TEMP[0], TEMP[1], SVIEW[0].r, SAMP[0], TEMP[2].x</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_C_LZ">
+<tt class="descname">SAMPLE_C_LZ</tt><em class="property"> (Same as SAMPLE_C, but LOD is 0 and derivatives)</em><a class="headerlink" href="#opcode-SAMPLE_C_LZ" title="Permalink to this definition">¶</a></dt>
+<dt id="opcode-ARE IGNORED. THE LZ STANDS FOR LEVEL">
+<tt class="descname">ARE IGNORED. THE LZ STANDS FOR LEVEL</tt><em class="property"> (zero.)</em><a class="headerlink" href="#opcode-ARE IGNORED. THE LZ STANDS FOR LEVEL" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">SAMPLE_C_LZ dst, address, sampler_view.r, sampler, ref_value</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_C_LZ TEMP[0], TEMP[1], SVIEW[0].r, SAMP[0], TEMP[2].x</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_D">
+<tt class="descname">SAMPLE_D</tt><em class="property"> (SAMPLE_D is identical to the SAMPLE opcode except)</em><a class="headerlink" href="#opcode-SAMPLE_D" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">that the derivatives for the source address in the x</tt></dt>
+<dt>
+<tt class="descname">direction and the y direction are provided by extra</tt></dt>
+<dt>
+<tt class="descname">parameters.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_D dst, address, sampler_view, sampler, der_x, der_y</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_D TEMP[0], TEMP[1], SVIEW[0], SAMP[0], TEMP[2], TEMP[3]</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_L">
+<tt class="descname">SAMPLE_L</tt><em class="property"> (SAMPLE_L is identical to the SAMPLE opcode except)</em><a class="headerlink" href="#opcode-SAMPLE_L" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">that the LOD is provided directly as a scalar value,</tt></dt>
+<dt>
+<tt class="descname">representing no anisotropy. Source addresses A channel</tt></dt>
+<dt>
+<tt class="descname">is used as the LOD.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_L dst, address, sampler_view, sampler</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SAMPLE_L TEMP[0], TEMP[1], SVIEW[0], SAMP[0]</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-GATHER4">
+<tt class="descname">GATHER4</tt><em class="property"> (Gathers the four texels to be used in a bi-linear)</em><a class="headerlink" href="#opcode-GATHER4" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">filtering operation and packs them into a single register.</tt></dt>
+<dt>
+<tt class="descname">Only works with 2D, 2D array, cubemaps, and cubemaps arrays.</tt></dt>
+<dt>
+<tt class="descname">For 2D textures, only the addressing modes of the sampler and</tt></dt>
+<dt>
+<tt class="descname">the top level of any mip pyramid are used. Set W to zero.</tt></dt>
+<dt>
+<tt class="descname">It behaves like the SAMPLE instruction, but a filtered</tt></dt>
+<dt>
+<tt class="descname">sample is not generated. The four samples that contribute</tt></dt>
+<dt id="opcode-TO FILTERING ARE PLACED INTO XYZW IN COUNTER">
+<tt class="descname">TO FILTERING ARE PLACED INTO XYZW IN COUNTER</tt><em class="property"> (clockwise order,)</em><a class="headerlink" href="#opcode-TO FILTERING ARE PLACED INTO XYZW IN COUNTER" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">starting with the (u,v) texture coordinate delta at the</tt></dt>
+<dt id="opcode-FOLLOWING LOCATIONS (">
+<tt class="descname">FOLLOWING LOCATIONS (</tt><em class="property"> (, +), (+, +), (+, -), (-, -), where)</em><a class="headerlink" href="#opcode-FOLLOWING LOCATIONS (" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">the magnitude of the deltas are half a texel.</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SVIEWINFO">
+<tt class="descname">SVIEWINFO</tt><em class="property"> (query the dimensions of a given sampler view.)</em><a class="headerlink" href="#opcode-SVIEWINFO" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">dst receives width, height, depth or array size and</tt></dt>
+<dt>
+<tt class="descname">number of mipmap levels. The dst can have a writemask</tt></dt>
+<dt>
+<tt class="descname">which will specify what info is the caller interested</tt></dt>
+<dt>
+<tt class="descname">in.</tt></dt>
+<dt>
+<tt class="descname">SVIEWINFO dst, src_mip_level, sampler_view</tt></dt>
+<dt>
+<tt class="descname">e.g.</tt></dt>
+<dt>
+<tt class="descname">SVIEWINFO TEMP[0], TEMP[1].x, SVIEW[0]</tt></dt>
+<dt>
+<tt class="descname">src_mip_level is an unsigned integer scalar. If it's</tt></dt>
+<dt>
+<tt class="descname">out of range then returns 0 for width, height and</tt></dt>
+<dt>
+<tt class="descname">depth/array size but the total number of mipmap is</tt></dt>
+<dt>
+<tt class="descname">still returned correctly for the given sampler view.</tt></dt>
+<dt>
+<tt class="descname">The returned width, height and depth values are for</tt></dt>
+<dt>
+<tt class="descname">the mipmap level selected by the src_mip_level and</tt></dt>
+<dt>
+<tt class="descname">are in the number of texels.</tt></dt>
+<dt>
+<tt class="descname">For 1d texture array width is in dst.x, array size</tt></dt>
+<dt>
+<tt class="descname">is in dst.y and dst.zw are always 0.</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_POS">
+<tt class="descname">SAMPLE_POS</tt><em class="property"> (query the position of a given sample.)</em><a class="headerlink" href="#opcode-SAMPLE_POS" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">dst receives float4 (x, y, 0, 0) indicated where the</tt></dt>
+<dt id="opcode-SAMPLE IS LOCATED. IF THE RESOURCE IS NOT A MULTI">
+<tt class="descname">SAMPLE IS LOCATED. IF THE RESOURCE IS NOT A MULTI</tt><em class="property"> (sample)</em><a class="headerlink" href="#opcode-SAMPLE IS LOCATED. IF THE RESOURCE IS NOT A MULTI" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">resource and not a render target, the result is 0.</tt></dt>
+<dd></dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SAMPLE_INFO">
+<tt class="descname">SAMPLE_INFO</tt><em class="property"> (dst receives number of samples in x.)</em><a class="headerlink" href="#opcode-SAMPLE_INFO" title="Permalink to this definition">¶</a></dt>
+<dt id="opcode-IF THE RESOURCE IS NOT A MULTI">
+<tt class="descname">IF THE RESOURCE IS NOT A MULTI</tt><em class="property"> (sample resource and)</em><a class="headerlink" href="#opcode-IF THE RESOURCE IS NOT A MULTI" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">not a render target, the result is 0.</tt></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="resource-access-opcodes">
+<span id="resourceopcodes"></span><h3>Resource Access Opcodes<a class="headerlink" href="#resource-access-opcodes" title="Permalink to this headline">¶</a></h3>
+<dl class="opcode">
+<dt id="opcode-LOAD">
+<tt class="descname">LOAD</tt><em class="property"> (Fetch data from a shader resource)</em><a class="headerlink" href="#opcode-LOAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">LOAD</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">address</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">LOAD</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1]</span></tt></p>
+<p>Using the provided integer address, LOAD fetches data
+from the specified buffer or texture without any
+filtering.</p>
+<p>The &#8216;address&#8217; is specified as a vector of unsigned
+integers.  If the &#8216;address&#8217; is out of range the result
+is unspecified.</p>
+<p>Only the first mipmap level of a resource can be read
+from using this instruction.</p>
+<p>For 1D or 2D texture arrays, the array index is
+provided as an unsigned integer in address.y or
+address.z, respectively.  address.yz are ignored for
+buffers and 1D textures.  address.z is ignored for 1D
+texture arrays and 2D textures.  address.w is always
+ignored.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-STORE">
+<tt class="descname">STORE</tt><em class="property"> (Write data to a shader resource)</em><a class="headerlink" href="#opcode-STORE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">STORE</span> <span class="pre">resource,</span> <span class="pre">address,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">STORE</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[0],</span> <span class="pre">TEMP[1]</span></tt></p>
+<p>Using the provided integer address, STORE writes data
+to the specified buffer or texture.</p>
+<p>The &#8216;address&#8217; is specified as a vector of unsigned
+integers.  If the &#8216;address&#8217; is out of range the result
+is unspecified.</p>
+<p>Only the first mipmap level of a resource can be
+written to using this instruction.</p>
+<p>For 1D or 2D texture arrays, the array index is
+provided as an unsigned integer in address.y or
+address.z, respectively.  address.yz are ignored for
+buffers and 1D textures.  address.z is ignored for 1D
+texture arrays and 2D textures.  address.w is always
+ignored.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="inter-thread-synchronization-opcodes">
+<span id="threadsyncopcodes"></span><h3>Inter-thread synchronization opcodes<a class="headerlink" href="#inter-thread-synchronization-opcodes" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes are intended for communication between threads running
+within the same compute grid.  For now they&#8217;re only valid in compute
+programs.</p>
+<dl class="opcode">
+<dt id="opcode-MFENCE">
+<tt class="descname">MFENCE</tt><em class="property"> (Memory fence)</em><a class="headerlink" href="#opcode-MFENCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">MFENCE</span> <span class="pre">resource</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">MFENCE</span> <span class="pre">RES[0]</span></tt></p>
+<p>This opcode forces strong ordering between any memory access
+operations that affect the specified resource.  This means that
+previous loads and stores (and only those) will be performed and
+visible to other threads before the program execution continues.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-LFENCE">
+<tt class="descname">LFENCE</tt><em class="property"> (Load memory fence)</em><a class="headerlink" href="#opcode-LFENCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">LFENCE</span> <span class="pre">resource</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">LFENCE</span> <span class="pre">RES[0]</span></tt></p>
+<p>Similar to MFENCE, but it only affects the ordering of memory loads.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-SFENCE">
+<tt class="descname">SFENCE</tt><em class="property"> (Store memory fence)</em><a class="headerlink" href="#opcode-SFENCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">SFENCE</span> <span class="pre">resource</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">SFENCE</span> <span class="pre">RES[0]</span></tt></p>
+<p>Similar to MFENCE, but it only affects the ordering of memory stores.</p>
+</dd></dl>
+
+<dl class="opcode">
+<dt id="opcode-BARRIER">
+<tt class="descname">BARRIER</tt><em class="property"> (Thread group barrier)</em><a class="headerlink" href="#opcode-BARRIER" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="docutils literal"><span class="pre">BARRIER</span></tt></p>
+<p>This opcode suspends the execution of the current thread until all
+the remaining threads in the working group reach the same point of
+the program.  Results are unspecified if any of the remaining
+threads terminates or never reaches an executed BARRIER instruction.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="atomic-opcodes">
+<span id="atomopcodes"></span><h3>Atomic opcodes<a class="headerlink" href="#atomic-opcodes" title="Permalink to this headline">¶</a></h3>
+<p>These opcodes provide atomic variants of some common arithmetic and
+logical operations.  In this context atomicity means that another
+concurrent memory access operation that affects the same memory
+location is guaranteed to be performed strictly before or after the
+entire execution of the atomic operation.</p>
+<p>For the moment they&#8217;re only valid in compute programs.</p>
+<dl class="opcode">
+<dt id="opcode-ATOMUADD">
+<tt class="descname">ATOMUADD</tt><em class="property"> (Atomic integer addition)</em><a class="headerlink" href="#opcode-ATOMUADD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMUADD</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMUADD</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = dst_i + src_i</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMXCHG">
+<tt class="descname">ATOMXCHG</tt><em class="property"> (Atomic exchange)</em><a class="headerlink" href="#opcode-ATOMXCHG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMXCHG</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMXCHG</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = src_i</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMCAS">
+<tt class="descname">ATOMCAS</tt><em class="property"> (Atomic compare-and-exchange)</em><a class="headerlink" href="#opcode-ATOMCAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMCAS</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">cmp,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMCAS</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2],</span> <span class="pre">TEMP[3]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = (dst_i == cmp_i ? src_i : dst_i)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMAND">
+<tt class="descname">ATOMAND</tt><em class="property"> (Atomic bitwise And)</em><a class="headerlink" href="#opcode-ATOMAND" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMAND</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMAND</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = dst_i \&amp; src_i</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMOR">
+<tt class="descname">ATOMOR</tt><em class="property"> (Atomic bitwise Or)</em><a class="headerlink" href="#opcode-ATOMOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMOR</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMOR</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = dst_i | src_i</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMXOR">
+<tt class="descname">ATOMXOR</tt><em class="property"> (Atomic bitwise Xor)</em><a class="headerlink" href="#opcode-ATOMXOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMXOR</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMXOR</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = dst_i \oplus src_i</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMUMIN">
+<tt class="descname">ATOMUMIN</tt><em class="property"> (Atomic unsigned minimum)</em><a class="headerlink" href="#opcode-ATOMUMIN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMUMIN</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMUMIN</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = (dst_i &lt; src_i ? dst_i : src_i)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMUMAX">
+<tt class="descname">ATOMUMAX</tt><em class="property"> (Atomic unsigned maximum)</em><a class="headerlink" href="#opcode-ATOMUMAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMUMAX</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMUMAX</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = (dst_i &gt; src_i ? dst_i : src_i)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMIMIN">
+<tt class="descname">ATOMIMIN</tt><em class="property"> (Atomic signed minimum)</em><a class="headerlink" href="#opcode-ATOMIMIN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMIMIN</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMIMIN</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = (dst_i &lt; src_i ? dst_i : src_i)</span></p>
+</div><dl class="opcode">
+<dt id="opcode-ATOMIMAX">
+<tt class="descname">ATOMIMAX</tt><em class="property"> (Atomic signed maximum)</em><a class="headerlink" href="#opcode-ATOMIMAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntax: <tt class="docutils literal"><span class="pre">ATOMIMAX</span> <span class="pre">dst,</span> <span class="pre">resource,</span> <span class="pre">offset,</span> <span class="pre">src</span></tt></p>
+<p>Example: <tt class="docutils literal"><span class="pre">ATOMIMAX</span> <span class="pre">TEMP[0],</span> <span class="pre">RES[0],</span> <span class="pre">TEMP[1],</span> <span class="pre">TEMP[2]</span></tt></p>
+<p>The following operation is performed atomically on each component:</p>
+</dd></dl>
+
+<div class="math">
+<p><span class="math">dst_i = resource[offset]_i
+
+resource[offset]_i = (dst_i &gt; src_i ? dst_i : src_i)</span></p>
+</div></div>
+</div>
+<div class="section" id="explanation-of-symbols-used">
+<h2>Explanation of symbols used<a class="headerlink" href="#explanation-of-symbols-used" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p><span class="math">|x|</span>       Absolute value of <cite>x</cite>.</p>
+<p><span class="math">\lceil x \rceil</span> Ceiling of <cite>x</cite>.</p>
+<dl class="docutils">
+<dt>clamp(x,y,z)      Clamp x between y and z.</dt>
+<dd>(x &lt; y) ? y : (x &gt; z) ? z : x</dd>
+</dl>
+<p><span class="math">\lfloor x\rfloor</span> Floor of <cite>x</cite>.</p>
+<p><span class="math">\log_2{x}</span> Logarithm of <cite>x</cite>, base 2.</p>
+<dl class="docutils">
+<dt>max(x,y)          Maximum of x and y.</dt>
+<dd>(x &gt; y) ? x : y</dd>
+<dt>min(x,y)          Minimum of x and y.</dt>
+<dd>(x &lt; y) ? x : y</dd>
+</dl>
+<p>partialx(x)       Derivative of x relative to fragment&#8217;s X.</p>
+<p>partialy(x)       Derivative of x relative to fragment&#8217;s Y.</p>
+<p>pop()             Pop from stack.</p>
+<p><span class="math">x^y</span>       <cite>x</cite> to the power <cite>y</cite>.</p>
+<p>push(x)           Push x on stack.</p>
+<p>round(x)          Round x.</p>
+<p>trunc(x)          Truncate x, i.e. drop the fraction bits.</p>
+</div></blockquote>
+</div>
+<div class="section" id="keywords">
+<h3>Keywords<a class="headerlink" href="#keywords" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>discard           Discard fragment.</p>
+<p>pc                Program counter.</p>
+<p>target            Label of target instruction.</p>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="other-tokens">
+<h2>Other tokens<a class="headerlink" href="#other-tokens" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="declaration">
+<h3>Declaration<a class="headerlink" href="#declaration" title="Permalink to this headline">¶</a></h3>
+<p>Declares a register that is will be referenced as an operand in Instruction
+tokens.</p>
+<p>File field contains register file that is being declared and is one
+of TGSI_FILE.</p>
+<p>UsageMask field specifies which of the register components can be accessed
+and is one of TGSI_WRITEMASK.</p>
+<p>The Local flag specifies that a given value isn&#8217;t intended for
+subroutine parameter passing and, as a result, the implementation
+isn&#8217;t required to give any guarantees of it being preserved across
+subroutine boundaries.  As it&#8217;s merely a compiler hint, the
+implementation is free to ignore it.</p>
+<p>If Dimension flag is set to 1, a Declaration Dimension token follows.</p>
+<p>If Semantic flag is set to 1, a Declaration Semantic token follows.</p>
+<p>If Interpolate flag is set to 1, a Declaration Interpolate token follows.</p>
+<p>If file is TGSI_FILE_RESOURCE, a Declaration Resource token follows.</p>
+</div>
+<div class="section" id="declaration-semantic">
+<h3>Declaration Semantic<a class="headerlink" href="#declaration-semantic" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Vertex and fragment shader input and output registers may be labeled
+with semantic information consisting of a name and index.</p>
+<p>Follows Declaration token if Semantic bit is set.</p>
+<p>Since its purpose is to link a shader with other stages of the pipeline,
+it is valid to follow only those Declaration tokens that declare a register
+either in INPUT or OUTPUT file.</p>
+<p>SemanticName field contains the semantic name of the register being declared.
+There is no default value.</p>
+<p>SemanticIndex is an optional subscript that can be used to distinguish
+different register declarations with the same semantic name. The default value
+is 0.</p>
+<p>The meanings of the individual semantic names are explained in the following
+sections.</p>
+</div></blockquote>
+<div class="section" id="tgsi-semantic-position">
+<h4>TGSI_SEMANTIC_POSITION<a class="headerlink" href="#tgsi-semantic-position" title="Permalink to this headline">¶</a></h4>
+<p>For vertex shaders, TGSI_SEMANTIC_POSITION indicates the vertex shader
+output register which contains the homogeneous vertex position in the clip
+space coordinate system.  After clipping, the X, Y and Z components of the
+vertex will be divided by the W value to get normalized device coordinates.</p>
+<p>For fragment shaders, TGSI_SEMANTIC_POSITION is used to indicate that
+fragment shader input contains the fragment&#8217;s window position.  The X
+component starts at zero and always increases from left to right.
+The Y component starts at zero and always increases but Y=0 may either
+indicate the top of the window or the bottom depending on the fragment
+coordinate origin convention (see TGSI_PROPERTY_FS_COORD_ORIGIN).
+The Z coordinate ranges from 0 to 1 to represent depth from the front
+to the back of the Z buffer.  The W component contains the reciprocol
+of the interpolated vertex position W component.</p>
+<p>Fragment shaders may also declare an output register with
+TGSI_SEMANTIC_POSITION.  Only the Z component is writable.  This allows
+the fragment shader to change the fragment&#8217;s Z position.</p>
+</div>
+<div class="section" id="tgsi-semantic-color">
+<h4>TGSI_SEMANTIC_COLOR<a class="headerlink" href="#tgsi-semantic-color" title="Permalink to this headline">¶</a></h4>
+<p>For vertex shader outputs or fragment shader inputs/outputs, this
+label indicates that the resister contains an R,G,B,A color.</p>
+<p>Several shader inputs/outputs may contain colors so the semantic index
+is used to distinguish them.  For example, color[0] may be the diffuse
+color while color[1] may be the specular color.</p>
+<p>This label is needed so that the flat/smooth shading can be applied
+to the right interpolants during rasterization.</p>
+</div>
+<div class="section" id="tgsi-semantic-bcolor">
+<h4>TGSI_SEMANTIC_BCOLOR<a class="headerlink" href="#tgsi-semantic-bcolor" title="Permalink to this headline">¶</a></h4>
+<p>Back-facing colors are only used for back-facing polygons, and are only valid
+in vertex shader outputs. After rasterization, all polygons are front-facing
+and COLOR and BCOLOR end up occupying the same slots in the fragment shader,
+so all BCOLORs effectively become regular COLORs in the fragment shader.</p>
+</div>
+<div class="section" id="tgsi-semantic-fog">
+<h4>TGSI_SEMANTIC_FOG<a class="headerlink" href="#tgsi-semantic-fog" title="Permalink to this headline">¶</a></h4>
+<p>Vertex shader inputs and outputs and fragment shader inputs may be
+labeled with TGSI_SEMANTIC_FOG to indicate that the register contains
+a fog coordinate in the form (F, 0, 0, 1).  Typically, the fragment
+shader will use the fog coordinate to compute a fog blend factor which
+is used to blend the normal fragment color with a constant fog color.</p>
+<p>Only the first component matters when writing from the vertex shader;
+the driver will ensure that the coordinate is in this format when used
+as a fragment shader input.</p>
+</div>
+<div class="section" id="tgsi-semantic-psize">
+<h4>TGSI_SEMANTIC_PSIZE<a class="headerlink" href="#tgsi-semantic-psize" title="Permalink to this headline">¶</a></h4>
+<p>Vertex shader input and output registers may be labeled with
+TGIS_SEMANTIC_PSIZE to indicate that the register contains a point size
+in the form (S, 0, 0, 1).  The point size controls the width or diameter
+of points for rasterization.  This label cannot be used in fragment
+shaders.</p>
+<p>When using this semantic, be sure to set the appropriate state in the
+<a class="reference internal" href="cso/rasterizer.html#rasterizer"><em>Rasterizer</em></a> first.</p>
+</div>
+<div class="section" id="tgsi-semantic-generic">
+<h4>TGSI_SEMANTIC_GENERIC<a class="headerlink" href="#tgsi-semantic-generic" title="Permalink to this headline">¶</a></h4>
+<p>All vertex/fragment shader inputs/outputs not labeled with any other
+semantic label can be considered to be generic attributes.  Typical
+uses of generic inputs/outputs are texcoords and user-defined values.</p>
+</div>
+<div class="section" id="tgsi-semantic-normal">
+<h4>TGSI_SEMANTIC_NORMAL<a class="headerlink" href="#tgsi-semantic-normal" title="Permalink to this headline">¶</a></h4>
+<p>Indicates that a vertex shader input is a normal vector.  This is
+typically only used for legacy graphics APIs.</p>
+</div>
+<div class="section" id="tgsi-semantic-face">
+<h4>TGSI_SEMANTIC_FACE<a class="headerlink" href="#tgsi-semantic-face" title="Permalink to this headline">¶</a></h4>
+<p>This label applies to fragment shader inputs only and indicates that
+the register contains front/back-face information of the form (F, 0,
+0, 1).  The first component will be positive when the fragment belongs
+to a front-facing polygon, and negative when the fragment belongs to a
+back-facing polygon.</p>
+</div>
+<div class="section" id="tgsi-semantic-edgeflag">
+<h4>TGSI_SEMANTIC_EDGEFLAG<a class="headerlink" href="#tgsi-semantic-edgeflag" title="Permalink to this headline">¶</a></h4>
+<p>For vertex shaders, this sematic label indicates that an input or
+output is a boolean edge flag.  The register layout is [F, x, x, x]
+where F is 0.0 or 1.0 and x = don&#8217;t care.  Normally, the vertex shader
+simply copies the edge flag input to the edgeflag output.</p>
+<p>Edge flags are used to control which lines or points are actually
+drawn when the polygon mode converts triangles/quads/polygons into
+points or lines.</p>
+</div>
+<div class="section" id="tgsi-semantic-stencil">
+<h4>TGSI_SEMANTIC_STENCIL<a class="headerlink" href="#tgsi-semantic-stencil" title="Permalink to this headline">¶</a></h4>
+<p>For fragment shaders, this semantic label indicates than an output
+is a writable stencil reference value. Only the Y component is writable.
+This allows the fragment shader to change the fragments stencilref value.</p>
+</div>
+</div>
+<div class="section" id="declaration-interpolate">
+<h3>Declaration Interpolate<a class="headerlink" href="#declaration-interpolate" title="Permalink to this headline">¶</a></h3>
+<p>This token is only valid for fragment shader INPUT declarations.</p>
+<p>The Interpolate field specifes the way input is being interpolated by
+the rasteriser and is one of TGSI_INTERPOLATE_*.</p>
+<p>The CylindricalWrap bitfield specifies which register components
+should be subject to cylindrical wrapping when interpolating by the
+rasteriser. If TGSI_CYLINDRICAL_WRAP_X is set to 1, the X component
+should be interpolated according to cylindrical wrapping rules.</p>
+</div>
+<div class="section" id="declaration-sampler-view">
+<h3>Declaration Sampler View<a class="headerlink" href="#declaration-sampler-view" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Follows Declaration token if file is TGSI_FILE_SAMPLER_VIEW.</p>
+<p>DCL SVIEW[#], resource, type(s)</p>
+<p>Declares a shader input sampler view and assigns it to a SVIEW[#]
+register.</p>
+<p>resource can be one of BUFFER, 1D, 2D, 3D, 1DArray and 2DArray.</p>
+<p>type must be 1 or 4 entries (if specifying on a per-component
+level) out of UNORM, SNORM, SINT, UINT and FLOAT.</p>
+</div></blockquote>
+</div>
+<div class="section" id="declaration-resource">
+<h3>Declaration Resource<a class="headerlink" href="#declaration-resource" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Follows Declaration token if file is TGSI_FILE_RESOURCE.</p>
+<p>DCL RES[#], resource [, WR] [, RAW]</p>
+<p>Declares a shader input resource and assigns it to a RES[#]
+register.</p>
+<p>resource can be one of BUFFER, 1D, 2D, 3D, CUBE, 1DArray and
+2DArray.</p>
+<p>If the RAW keyword is not specified, the texture data will be
+subject to conversion, swizzling and scaling as required to yield
+the specified data type from the physical data format of the bound
+resource.</p>
+<p>If the RAW keyword is specified, no channel conversion will be
+performed: the values read for each of the channels (X,Y,Z,W) will
+correspond to consecutive words in the same order and format
+they&#8217;re found in memory.  No element-to-address conversion will be
+performed either: the value of the provided X coordinate will be
+interpreted in byte units instead of texel units.  The result of
+accessing a misaligned address is undefined.</p>
+<p>Usage of the STORE opcode is only allowed if the WR (writable) flag
+is set.</p>
+</div></blockquote>
+</div>
+<div class="section" id="properties">
+<h3>Properties<a class="headerlink" href="#properties" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>Properties are general directives that apply to the whole TGSI program.</div></blockquote>
+<div class="section" id="fs-coord-origin">
+<h4>FS_COORD_ORIGIN<a class="headerlink" href="#fs-coord-origin" title="Permalink to this headline">¶</a></h4>
+<p>Specifies the fragment shader TGSI_SEMANTIC_POSITION coordinate origin.
+The default value is UPPER_LEFT.</p>
+<p>If UPPER_LEFT, the position will be (0,0) at the upper left corner and
+increase downward and rightward.
+If LOWER_LEFT, the position will be (0,0) at the lower left corner and
+increase upward and rightward.</p>
+<p>OpenGL defaults to LOWER_LEFT, and is configurable with the
+GL_ARB_fragment_coord_conventions extension.</p>
+<p>DirectX 9/10 use UPPER_LEFT.</p>
+</div>
+<div class="section" id="fs-coord-pixel-center">
+<h4>FS_COORD_PIXEL_CENTER<a class="headerlink" href="#fs-coord-pixel-center" title="Permalink to this headline">¶</a></h4>
+<p>Specifies the fragment shader TGSI_SEMANTIC_POSITION pixel center convention.
+The default value is HALF_INTEGER.</p>
+<p>If HALF_INTEGER, the fractionary part of the position will be 0.5
+If INTEGER, the fractionary part of the position will be 0.0</p>
+<p>Note that this does not affect the set of fragments generated by
+rasterization, which is instead controlled by gl_rasterization_rules in the
+rasterizer.</p>
+<p>OpenGL defaults to HALF_INTEGER, and is configurable with the
+GL_ARB_fragment_coord_conventions extension.</p>
+<p>DirectX 9 uses INTEGER.
+DirectX 10 uses HALF_INTEGER.</p>
+</div>
+<div class="section" id="fs-color0-writes-all-cbufs">
+<h4>FS_COLOR0_WRITES_ALL_CBUFS<a class="headerlink" href="#fs-color0-writes-all-cbufs" title="Permalink to this headline">¶</a></h4>
+<p>Specifies that writes to the fragment shader color 0 are replicated to all
+bound cbufs. This facilitates OpenGL&#8217;s fragColor output vs fragData[0] where
+fragData is directed to a single color buffer, but fragColor is broadcast.</p>
+</div>
+<div class="section" id="vs-prohibit-ucps">
+<h4>VS_PROHIBIT_UCPS<a class="headerlink" href="#vs-prohibit-ucps" title="Permalink to this headline">¶</a></h4>
+<p>If this property is set on the program bound to the shader stage before the
+fragment shader, user clip planes should have no effect (be disabled) even if
+that shader does not write to any clip distance outputs and the rasterizer&#8217;s
+clip_plane_enable is non-zero.
+This property is only supported by drivers that also support shader clip
+distance outputs.
+This is useful for APIs that don&#8217;t have UCPs and where clip distances written
+by a shader cannot be disabled.</p>
+</div>
+</div>
+</div>
+<div class="section" id="texture-sampling-and-texture-formats">
+<h2>Texture Sampling and Texture Formats<a class="headerlink" href="#texture-sampling-and-texture-formats" title="Permalink to this headline">¶</a></h2>
+<p>This table shows how texture image components are returned as (x,y,z,w) tuples
+by TGSI texture instructions, such as <a class="reference internal" href="#opcode-TEX"><tt class="xref std std-opcode docutils literal"><span class="pre">TEX</span></tt></a>, <a class="reference internal" href="#opcode-TXD"><tt class="xref std std-opcode docutils literal"><span class="pre">TXD</span></tt></a>, and
+<a class="reference internal" href="#opcode-TXP"><tt class="xref std std-opcode docutils literal"><span class="pre">TXP</span></tt></a>. For reference, OpenGL and Direct3D conventions are shown as
+well.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="21%" />
+<col width="29%" />
+<col width="21%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Texture Components</th>
+<th class="head">Gallium</th>
+<th class="head">OpenGL</th>
+<th class="head">Direct3D 9</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>R</td>
+<td>(r, 0, 0, 1)</td>
+<td>(r, 0, 0, 1)</td>
+<td>(r, 1, 1, 1)</td>
+</tr>
+<tr class="row-odd"><td>RG</td>
+<td>(r, g, 0, 1)</td>
+<td>(r, g, 0, 1)</td>
+<td>(r, g, 1, 1)</td>
+</tr>
+<tr class="row-even"><td>RGB</td>
+<td>(r, g, b, 1)</td>
+<td>(r, g, b, 1)</td>
+<td>(r, g, b, 1)</td>
+</tr>
+<tr class="row-odd"><td>RGBA</td>
+<td>(r, g, b, a)</td>
+<td>(r, g, b, a)</td>
+<td>(r, g, b, a)</td>
+</tr>
+<tr class="row-even"><td>A</td>
+<td>(0, 0, 0, a)</td>
+<td>(0, 0, 0, a)</td>
+<td>(0, 0, 0, a)</td>
+</tr>
+<tr class="row-odd"><td>L</td>
+<td>(l, l, l, 1)</td>
+<td>(l, l, l, 1)</td>
+<td>(l, l, l, 1)</td>
+</tr>
+<tr class="row-even"><td>LA</td>
+<td>(l, l, l, a)</td>
+<td>(l, l, l, a)</td>
+<td>(l, l, l, a)</td>
+</tr>
+<tr class="row-odd"><td>I</td>
+<td>(i, i, i, i)</td>
+<td>(i, i, i, i)</td>
+<td>N/A</td>
+</tr>
+<tr class="row-even"><td>UV</td>
+<td>XXX TBD</td>
+<td>(0, 0, 0, 1)
+<a class="footnote-reference" href="#envmap-bumpmap" id="id1">[1]</a></td>
+<td>(u, v, 1, 1)</td>
+</tr>
+<tr class="row-odd"><td>Z</td>
+<td>XXX TBD</td>
+<td>(z, z, z, 1)
+<a class="footnote-reference" href="#depth-tex-mode" id="id2">[2]</a></td>
+<td>(0, z, 0, 1)</td>
+</tr>
+<tr class="row-even"><td>S</td>
+<td>(s, s, s, s)</td>
+<td>unknown</td>
+<td>unknown</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="envmap-bumpmap" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="http://www.opengl.org/registry/specs/ATI/envmap_bumpmap.txt">http://www.opengl.org/registry/specs/ATI/envmap_bumpmap.txt</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="depth-tex-mode" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>the default is (z, z, z, 1) but may also be (0, 0, 0, z)
+or (z, z, z, z) depending on the value of GL_DEPTH_TEXTURE_MODE.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">TGSI</a><ul>
+<li><a class="reference internal" href="#basics">Basics</a></li>
+<li><a class="reference internal" href="#instruction-set">Instruction Set</a><ul>
+<li><a class="reference internal" href="#core-isa">Core ISA</a></li>
+<li><a class="reference internal" href="#compute-isa">Compute ISA</a></li>
+<li><a class="reference internal" href="#geometry-isa">Geometry ISA</a></li>
+<li><a class="reference internal" href="#glsl-isa">GLSL ISA</a></li>
+<li><a class="reference internal" href="#ps-2-x">ps_2_x</a></li>
+<li><a class="reference internal" href="#double-isa">Double ISA</a></li>
+<li><a class="reference internal" href="#resource-sampling-opcodes">Resource Sampling Opcodes</a></li>
+<li><a class="reference internal" href="#resource-access-opcodes">Resource Access Opcodes</a></li>
+<li><a class="reference internal" href="#inter-thread-synchronization-opcodes">Inter-thread synchronization opcodes</a></li>
+<li><a class="reference internal" href="#atomic-opcodes">Atomic opcodes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#explanation-of-symbols-used">Explanation of symbols used</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#keywords">Keywords</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-tokens">Other tokens</a><ul>
+<li><a class="reference internal" href="#declaration">Declaration</a></li>
+<li><a class="reference internal" href="#declaration-semantic">Declaration Semantic</a><ul>
+<li><a class="reference internal" href="#tgsi-semantic-position">TGSI_SEMANTIC_POSITION</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-color">TGSI_SEMANTIC_COLOR</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-bcolor">TGSI_SEMANTIC_BCOLOR</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-fog">TGSI_SEMANTIC_FOG</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-psize">TGSI_SEMANTIC_PSIZE</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-generic">TGSI_SEMANTIC_GENERIC</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-normal">TGSI_SEMANTIC_NORMAL</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-face">TGSI_SEMANTIC_FACE</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-edgeflag">TGSI_SEMANTIC_EDGEFLAG</a></li>
+<li><a class="reference internal" href="#tgsi-semantic-stencil">TGSI_SEMANTIC_STENCIL</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#declaration-interpolate">Declaration Interpolate</a></li>
+<li><a class="reference internal" href="#declaration-sampler-view">Declaration Sampler View</a></li>
+<li><a class="reference internal" href="#declaration-resource">Declaration Resource</a></li>
+<li><a class="reference internal" href="#properties">Properties</a><ul>
+<li><a class="reference internal" href="#fs-coord-origin">FS_COORD_ORIGIN</a></li>
+<li><a class="reference internal" href="#fs-coord-pixel-center">FS_COORD_PIXEL_CENTER</a></li>
+<li><a class="reference internal" href="#fs-color0-writes-all-cbufs">FS_COLOR0_WRITES_ALL_CBUFS</a></li>
+<li><a class="reference internal" href="#vs-prohibit-ucps">VS_PROHIBIT_UCPS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#texture-sampling-and-texture-formats">Texture Sampling and Texture Formats</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="debugging.html"
+                        title="previous chapter">Debugging</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="screen.html"
+                        title="next chapter">Screen</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tgsi.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="screen.html" title="Screen"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="debugging.html" title="Debugging"
+             >previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

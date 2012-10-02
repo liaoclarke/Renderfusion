@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Resources and derived objects &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="index.html" />
+    <link rel="next" title="Context" href="context.html" />
+    <link rel="prev" title="Screen" href="screen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="context.html" title="Context"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="screen.html" title="Screen"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="resources-and-derived-objects">
+<h1>Resources and derived objects<a class="headerlink" href="#resources-and-derived-objects" title="Permalink to this headline">¶</a></h1>
+<p>Resources represent objects that hold data: textures and buffers.</p>
+<p>They are mostly modelled after the resources in Direct3D 10/11, but with a
+different transfer/update mechanism, and more features for OpenGL support.</p>
+<p>Resources can be used in several ways, and it is required to specify all planned uses through an appropriate set of bind flags.</p>
+<p>TODO: write much more on resources</p>
+<div class="section" id="transfers">
+<h2>Transfers<a class="headerlink" href="#transfers" title="Permalink to this headline">¶</a></h2>
+<p>Transfers are the mechanism used to access resources with the CPU.</p>
+<p>OpenGL: OpenGL supports mapping buffers and has inline transfer functions for both buffers and textures</p>
+<p>D3D11: D3D11 lacks transfers, but has special resource types that are mappable to the CPU address space</p>
+<p>TODO: write much more on transfers</p>
+</div>
+<div class="section" id="resource-targets">
+<h2>Resource targets<a class="headerlink" href="#resource-targets" title="Permalink to this headline">¶</a></h2>
+<p>Resource targets determine the type of a resource.</p>
+<p>Note that drivers may not actually have the restrictions listed regarding
+coordinate normalization and wrap modes, and in fact efficient OpenCL
+support will probably require drivers that don&#8217;t have any of them, which
+will probably be advertised with an appropriate cap.</p>
+<p>TODO: document all targets. Note that both 3D and cube have restrictions
+that depend on the hardware generation.</p>
+<p>TODO: can buffers have a non-R8 format?</p>
+<div class="section" id="pipe-buffer">
+<h3>PIPE_BUFFER<a class="headerlink" href="#pipe-buffer" title="Permalink to this headline">¶</a></h3>
+<p>Buffer resource: can be used as a vertex, index, constant buffer (appropriate bind flags must be requested).</p>
+<p>They can be bound to stream output if supported.
+TODO: what about the restrictions lifted by the several later GL transform feedback extensions? How does one advertise that in Gallium?</p>
+<p>They can be also be bound to a shader stage as usual.
+TODO: are all drivers supposed to support this? how does this work exactly? are there size limits?</p>
+<p>They can be also be bound to the framebuffer as usual.
+TODO: are all drivers supposed to support this? how does this work exactly? are there size limits?
+TODO: is there any chance of supporting GL pixel buffer object acceleration with this?</p>
+<ul class="simple">
+<li>depth0 must be 1</li>
+<li>last_level must be 0</li>
+<li>TODO: what about normalization?</li>
+<li>TODO: wrap modes/other sampling state?</li>
+<li>TODO: are arbitrary formats supported? in which cases?</li>
+</ul>
+<p>OpenGL: vertex buffers in GL 1.5 or GL_ARB_vertex_buffer_object</p>
+<ul class="simple">
+<li>Binding to stream out requires GL 3.0 or GL_NV_transform_feedback</li>
+<li>Binding as constant buffers requires GL 3.1 or GL_ARB_uniform_buffer_object</li>
+<li>Binding to a sampling stage requires GL 3.1 or GL_ARB_texture_buffer_object</li>
+<li>TODO: can they be bound to an FBO?</li>
+</ul>
+<p>D3D11: buffer resources
+- Binding to a render target requires D3D_FEATURE_LEVEL_10_0</p>
+</div>
+<div class="section" id="pipe-texture-1d">
+<h3>PIPE_TEXTURE_1D<a class="headerlink" href="#pipe-texture-1d" title="Permalink to this headline">¶</a></h3>
+<p>1D surface accessed with normalized coordinates.</p>
+<p>UNIMPLEMENTED: 1D texture arrays not supported</p>
+<ul>
+<li><dl class="first docutils">
+<dt>If PIPE_CAP_NPOT_TEXTURES is not supported,</dt>
+<dd><p class="first last">width must be a power of two</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">height0 must be 1</p>
+</li>
+<li><p class="first">depth0 must be 1</p>
+</li>
+<li><p class="first">Mipmaps can be used</p>
+</li>
+<li><p class="first">Must use normalized coordinates</p>
+</li>
+</ul>
+<p>OpenGL: GL_TEXTURE_1D in GL 1.0</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to GL 2.0 or GL_ARB_texture_non_power_of_two</li>
+</ul>
+<p>D3D11: 1D textures in D3D_FEATURE_LEVEL_10_0</p>
+</div>
+<div class="section" id="pipe-texture-rect">
+<h3>PIPE_TEXTURE_RECT<a class="headerlink" href="#pipe-texture-rect" title="Permalink to this headline">¶</a></h3>
+<p>2D surface with OpenGL GL_TEXTURE_RECTANGLE semantics.</p>
+<ul class="simple">
+<li>depth0 must be 1</li>
+<li>last_level must be 0</li>
+<li>Must use unnormalized coordinates</li>
+<li>Must use a clamp wrap mode</li>
+</ul>
+<p>OpenGL: GL_TEXTURE_RECTANGLE in GL 3.1 or GL_ARB_texture_rectangle or GL_NV_texture_rectangle</p>
+<p>OpenCL: can create OpenCL images based on this, that can then be sampled arbitrarily</p>
+<p>D3D11: not supported (only PIPE_TEXTURE_2D with normalized coordinates is supported)</p>
+</div>
+<div class="section" id="pipe-texture-2d">
+<h3>PIPE_TEXTURE_2D<a class="headerlink" href="#pipe-texture-2d" title="Permalink to this headline">¶</a></h3>
+<p>2D surface accessed with normalized coordinates.</p>
+<p>UNIMPLEMENTED: 2D texture arrays not supported</p>
+<ul>
+<li><dl class="first docutils">
+<dt>If PIPE_CAP_NPOT_TEXTURES is not supported,</dt>
+<dd><p class="first last">width and height must be powers of two</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">depth0 must be 1</p>
+</li>
+<li><p class="first">Mipmaps can be used</p>
+</li>
+<li><p class="first">Must use normalized coordinates</p>
+</li>
+<li><p class="first">No special restrictions on wrap modes</p>
+</li>
+</ul>
+<p>OpenGL: GL_TEXTURE_2D in GL 1.0</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to GL 2.0 or GL_ARB_texture_non_power_of_two</li>
+</ul>
+<p>OpenCL: can create OpenCL images based on this, that can then be sampled arbitrarily</p>
+<p>D3D11: 2D textures</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to D3D_FEATURE_LEVEL_9_3</li>
+</ul>
+</div>
+<div class="section" id="pipe-texture-3d">
+<h3>PIPE_TEXTURE_3D<a class="headerlink" href="#pipe-texture-3d" title="Permalink to this headline">¶</a></h3>
+<p>3-dimensional array of texels.
+Mipmap dimensions are reduced in all 3 coordinates.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>If PIPE_CAP_NPOT_TEXTURES is not supported,</dt>
+<dd><p class="first last">width, height and depth must be powers of two</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Must use normalized coordinates</p>
+</li>
+</ul>
+<p>OpenGL: GL_TEXTURE_3D in GL 1.2 or GL_EXT_texture3D</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to GL 2.0 or GL_ARB_texture_non_power_of_two</li>
+</ul>
+<p>D3D11: 3D textures</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to D3D_FEATURE_LEVEL_10_0</li>
+</ul>
+</div>
+<div class="section" id="pipe-texture-cube">
+<h3>PIPE_TEXTURE_CUBE<a class="headerlink" href="#pipe-texture-cube" title="Permalink to this headline">¶</a></h3>
+<p>Cube maps consist of 6 2D faces.
+The 6 surfaces form an imaginary cube, and sampling happens by mapping an
+input 3-vector to the point of the cube surface in that direction.</p>
+<p>Sampling may be optionally seamless, resulting in filtering taking samples
+from multiple surfaces near to the edge.
+UNIMPLEMENTED: seamless cube map sampling not supported</p>
+<p>UNIMPLEMENTED: cube map arrays not supported</p>
+<ul>
+<li><p class="first">Width and height must be equal</p>
+</li>
+<li><dl class="first docutils">
+<dt>If PIPE_CAP_NPOT_TEXTURES is not supported,</dt>
+<dd><p class="first last">width and height must be powers of two</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Must use normalized coordinates</p>
+</li>
+</ul>
+<p>OpenGL: GL_TEXTURE_CUBE_MAP in GL 1.3 or EXT_texture_cube_map</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to GL 2.0 or GL_ARB_texture_non_power_of_two</li>
+<li>Seamless cube maps require GL 3.2 or GL_ARB_seamless_cube_map or GL_AMD_seamless_cubemap_per_texture</li>
+<li>Cube map arrays require GL 4.0 or GL_ARB_texture_cube_map_array</li>
+</ul>
+<p>D3D11: 2D array textures with the D3D11_RESOURCE_MISC_TEXTURECUBE flag</p>
+<ul class="simple">
+<li>PIPE_CAP_NPOT_TEXTURES is equivalent to D3D_FEATURE_LEVEL_10_0</li>
+<li>Cube map arrays require D3D_FEATURE_LEVEL_10_1</li>
+<li>TODO: are (non)seamless cube maps supported in D3D11? how?</li>
+</ul>
+</div>
+</div>
+<div class="section" id="surfaces">
+<h2>Surfaces<a class="headerlink" href="#surfaces" title="Permalink to this headline">¶</a></h2>
+<p>Surfaces are views of a resource that can be bound as a framebuffer to serve as the render target or depth buffer.</p>
+<p>TODO: write much more on surfaces</p>
+<p>OpenGL: FBOs are collections of surfaces in GL 3.0 or GL_ARB_framebuffer_object</p>
+<p>D3D11: render target views and depth/stencil views</p>
+</div>
+<div class="section" id="sampler-views">
+<h2>Sampler views<a class="headerlink" href="#sampler-views" title="Permalink to this headline">¶</a></h2>
+<p>Sampler views are views of a resource that can be bound to a pipeline stage to be sampled from shaders.</p>
+<p>TODO: write much more on sampler views</p>
+<p>OpenGL: texture objects are actually sampler view and resource in a single unit</p>
+<p>D3D11: shader resource views</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Resources and derived objects</a><ul>
+<li><a class="reference internal" href="#transfers">Transfers</a></li>
+<li><a class="reference internal" href="#resource-targets">Resource targets</a><ul>
+<li><a class="reference internal" href="#pipe-buffer">PIPE_BUFFER</a></li>
+<li><a class="reference internal" href="#pipe-texture-1d">PIPE_TEXTURE_1D</a></li>
+<li><a class="reference internal" href="#pipe-texture-rect">PIPE_TEXTURE_RECT</a></li>
+<li><a class="reference internal" href="#pipe-texture-2d">PIPE_TEXTURE_2D</a></li>
+<li><a class="reference internal" href="#pipe-texture-3d">PIPE_TEXTURE_3D</a></li>
+<li><a class="reference internal" href="#pipe-texture-cube">PIPE_TEXTURE_CUBE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#surfaces">Surfaces</a></li>
+<li><a class="reference internal" href="#sampler-views">Sampler views</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="screen.html"
+                        title="previous chapter">Screen</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="context.html"
+                        title="next chapter">Context</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/resources.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="context.html" title="Context"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="screen.html" title="Screen"
+             >previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

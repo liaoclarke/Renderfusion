@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Rasterizer &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="../index.html" />
+    <link rel="up" title="CSO" href="../cso.html" />
+    <link rel="next" title="Sampler" href="sampler.html" />
+    <link rel="prev" title="Depth, Stencil, &amp; Alpha" href="dsa.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="sampler.html" title="Sampler"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dsa.html" title="Depth, Stencil, &amp; Alpha"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Gallium 0.4 documentation</a> &raquo;</li>
+          <li><a href="../cso.html" accesskey="U">CSO</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rasterizer">
+<span id="id1"></span><h1>Rasterizer<a class="headerlink" href="#rasterizer" title="Permalink to this headline">¶</a></h1>
+<p>The rasterizer state controls the rendering of points, lines and triangles.
+Attributes include polygon culling state, line width, line stipple,
+multisample state, scissoring and flat/smooth shading.</p>
+<p>Linkage</p>
+<div class="section" id="clamp-vertex-color">
+<h2>clamp_vertex_color<a class="headerlink" href="#clamp-vertex-color" title="Permalink to this headline">¶</a></h2>
+<p>If set, TGSI_SEMANTIC_COLOR registers are clamped to the [0, 1] range after
+the execution of the vertex shader, before being passed to the geometry
+shader or fragment shader.</p>
+<p>OpenGL: glClampColor(GL_CLAMP_VERTEX_COLOR) in GL 3.0 or GL_ARB_color_buffer_float</p>
+<p>D3D11: seems always disabled</p>
+<p>Note the PIPE_CAP_VERTEX_COLOR_CLAMPED query indicates whether or not the
+driver supports this control.  If it&#8217;s not supported, the state tracker may
+have to insert extra clamping code.</p>
+</div>
+<div class="section" id="clamp-fragment-color">
+<h2>clamp_fragment_color<a class="headerlink" href="#clamp-fragment-color" title="Permalink to this headline">¶</a></h2>
+<p>Controls whether TGSI_SEMANTIC_COLOR outputs of the fragment shader
+are clamped to [0, 1].</p>
+<p>OpenGL: glClampColor(GL_CLAMP_FRAGMENT_COLOR) in GL 3.0 or ARB_color_buffer_float</p>
+<p>D3D11: seems always disabled</p>
+<p>Note the PIPE_CAP_FRAGMENT_COLOR_CLAMPED query indicates whether or not the
+driver supports this control.  If it&#8217;s not supported, the state tracker may
+have to insert extra clamping code.</p>
+<div class="section" id="shading">
+<h3>Shading<a class="headerlink" href="#shading" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="flatshade">
+<h2>flatshade<a class="headerlink" href="#flatshade" title="Permalink to this headline">¶</a></h2>
+<p>If set, the provoking vertex of each polygon is used to determine the color
+of the entire polygon.  If not set, fragment colors will be interpolated
+between the vertex colors.</p>
+<p>The actual interpolated shading algorithm is obviously
+implementation-dependent, but will usually be Gourard for most hardware.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This is separate from the fragment shader input attributes
+CONSTANT, LINEAR and PERSPECTIVE. The flatshade state is needed at
+clipping time to determine how to set the color of new vertices.</p>
+<p class="last"><a class="reference internal" href="../distro.html#draw"><em>Draw</em></a> can implement flat shading by copying the provoking vertex
+color to all the other vertices in the primitive.</p>
+</div>
+</div>
+<div class="section" id="flatshade-first">
+<h2>flatshade_first<a class="headerlink" href="#flatshade-first" title="Permalink to this headline">¶</a></h2>
+<p>Whether the first vertex should be the provoking vertex, for most primitives.
+If not set, the last vertex is the provoking vertex.</p>
+<p>There are a few important exceptions to the specification of this rule.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_PRIMITIVE_POLYGON</span></tt>: The provoking vertex is always the first
+vertex. If the caller wishes to change the provoking vertex, they merely
+need to rotate the vertices themselves.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_PRIMITIVE_QUAD</span></tt>, <tt class="docutils literal"><span class="pre">PIPE_PRIMITIVE_QUAD_STRIP</span></tt>: The option only has
+an effect if <tt class="docutils literal"><span class="pre">PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION</span></tt> is true.
+If it is not, the provoking vertex is always the last vertex.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_PRIMITIVE_TRIANGLE_FAN</span></tt>: When set, the provoking vertex is the
+second vertex, not the first. This permits each segment of the fan to have
+a different color.</li>
+</ul>
+<div class="section" id="polygons">
+<h3>Polygons<a class="headerlink" href="#polygons" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="light-twoside">
+<h2>light_twoside<a class="headerlink" href="#light-twoside" title="Permalink to this headline">¶</a></h2>
+<p>If set, there are per-vertex back-facing colors.  The hardware
+(perhaps assisted by <a class="reference internal" href="../distro.html#draw"><em>Draw</em></a>) should be set up to use this state
+along with the front/back information to set the final vertex colors
+prior to rasterization.</p>
+<p>The frontface vertex shader color output is marked with TGSI semantic
+COLOR[0], and backface COLOR[1].</p>
+<dl class="docutils">
+<dt>front_ccw</dt>
+<dd>Indicates whether the window order of front-facing polygons is
+counter-clockwise (TRUE) or clockwise (FALSE).</dd>
+<dt>cull_mode</dt>
+<dd>Indicates which faces of polygons to cull, either PIPE_FACE_NONE
+(cull no polygons), PIPE_FACE_FRONT (cull front-facing polygons),
+PIPE_FACE_BACK (cull back-facing polygons), or
+PIPE_FACE_FRONT_AND_BACK (cull all polygons).</dd>
+<dt>fill_front</dt>
+<dd>Indicates how to fill front-facing polygons, either
+PIPE_POLYGON_MODE_FILL, PIPE_POLYGON_MODE_LINE or
+PIPE_POLYGON_MODE_POINT.</dd>
+<dt>fill_back</dt>
+<dd>Indicates how to fill back-facing polygons, either
+PIPE_POLYGON_MODE_FILL, PIPE_POLYGON_MODE_LINE or
+PIPE_POLYGON_MODE_POINT.</dd>
+<dt>poly_stipple_enable</dt>
+<dd>Whether polygon stippling is enabled.</dd>
+<dt>poly_smooth</dt>
+<dd>Controls OpenGL-style polygon smoothing/antialiasing</dd>
+<dt>offset_point</dt>
+<dd>If set, point-filled polygons will have polygon offset factors applied</dd>
+<dt>offset_line</dt>
+<dd>If set, line-filled polygons will have polygon offset factors applied</dd>
+<dt>offset_tri</dt>
+<dd>If set, filled polygons will have polygon offset factors applied</dd>
+<dt>offset_units</dt>
+<dd>Specifies the polygon offset bias</dd>
+<dt>offset_scale</dt>
+<dd>Specifies the polygon offset scale</dd>
+<dt>offset_clamp</dt>
+<dd>Upper (if &gt; 0) or lower (if &lt; 0) bound on the polygon offset result</dd>
+</dl>
+<div class="section" id="lines">
+<h3>Lines<a class="headerlink" href="#lines" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>line_width</dt>
+<dd>The width of lines.</dd>
+<dt>line_smooth</dt>
+<dd>Whether lines should be smoothed. Line smoothing is simply anti-aliasing.</dd>
+<dt>line_stipple_enable</dt>
+<dd>Whether line stippling is enabled.</dd>
+<dt>line_stipple_pattern</dt>
+<dd>16-bit bitfield of on/off flags, used to pattern the line stipple.</dd>
+<dt>line_stipple_factor</dt>
+<dd>When drawing a stippled line, each bit in the stipple pattern is
+repeated N times, where N = line_stipple_factor + 1.</dd>
+<dt>line_last_pixel</dt>
+<dd>Controls whether the last pixel in a line is drawn or not.  OpenGL
+omits the last pixel to avoid double-drawing pixels at the ends of lines
+when drawing connected lines.</dd>
+</dl>
+</div>
+<div class="section" id="points">
+<h3>Points<a class="headerlink" href="#points" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="sprite-coord-enable">
+<h2>sprite_coord_enable<a class="headerlink" href="#sprite-coord-enable" title="Permalink to this headline">¶</a></h2>
+<p>Controls automatic texture coordinate generation for rendering sprite points.</p>
+<p>When bit k in the sprite_coord_enable bitfield is set, then generic
+input k to the fragment shader will get an automatically computed
+texture coordinate.</p>
+<p>The texture coordinate will be of the form (s, t, 0, 1) where s varies
+from 0 to 1 from left to right while t varies from 0 to 1 according to
+the state of &#8216;sprite_coord_mode&#8217; (see below).</p>
+<p>If any bit is set, then point_smooth MUST be disabled (there are no
+round sprites) and point_quad_rasterization MUST be true (sprites are
+always rasterized as quads).  Any mismatch between these states should
+be considered a bug in the state-tracker.</p>
+<p>This feature is implemented in the <a class="reference internal" href="../distro.html#draw"><em>Draw</em></a> module but may also be
+implemented natively by GPUs or implemented with a geometry shader.</p>
+</div>
+<div class="section" id="sprite-coord-mode">
+<h2>sprite_coord_mode<a class="headerlink" href="#sprite-coord-mode" title="Permalink to this headline">¶</a></h2>
+<p>Specifies how the value for each shader output should be computed when drawing
+point sprites. For PIPE_SPRITE_COORD_LOWER_LEFT, the lower-left vertex will
+have coordinates (0,0,0,1). For PIPE_SPRITE_COORD_UPPER_LEFT, the upper-left
+vertex will have coordinates (0,0,0,1).
+This state is used by <a class="reference internal" href="../distro.html#draw"><em>Draw</em></a> to generate texcoords.</p>
+</div>
+<div class="section" id="point-quad-rasterization">
+<h2>point_quad_rasterization<a class="headerlink" href="#point-quad-rasterization" title="Permalink to this headline">¶</a></h2>
+<p>Determines if points should be rasterized according to quad or point
+rasterization rules.</p>
+<p>OpenGL actually has quite different rasterization rules for points and
+point sprites - hence this indicates if points should be rasterized as
+points or according to point sprite (which decomposes them into quads,
+basically) rules.</p>
+<p>Additionally Direct3D will always use quad rasterization rules for
+points, regardless of whether point sprites are enabled or not.</p>
+<p>If this state is enabled, point smoothing and antialiasing are
+disabled. If it is disabled, point sprite coordinates are not
+generated.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Some renderers always internally translate points into quads; this state
+still affects those renderers by overriding other rasterization state.</p>
+</div>
+<dl class="docutils">
+<dt>point_smooth</dt>
+<dd>Whether points should be smoothed. Point smoothing turns rectangular
+points into circles or ovals.</dd>
+<dt>point_size_per_vertex</dt>
+<dd>Whether the vertex shader is expected to have a point size output.
+Undefined behaviour is permitted if there is disagreement between
+this flag and the actual bound shader.</dd>
+<dt>point_size</dt>
+<dd>The size of points, if not specified per-vertex.</dd>
+</dl>
+<div class="section" id="other-members">
+<h3>Other Members<a class="headerlink" href="#other-members" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>scissor</dt>
+<dd>Whether the scissor test is enabled.</dd>
+<dt>multisample</dt>
+<dd>Whether <a class="reference internal" href="../glossary.html#term-msaa"><em class="xref std std-term">MSAA</em></a> is enabled.</dd>
+<dt>gl_rasterization_rules</dt>
+<dd>Whether the rasterizer should use (0.5, 0.5) pixel centers. When not set,
+the rasterizer will use (0, 0) for pixel centers.</dd>
+<dt>depth_clip</dt>
+<dd>When false, the near and far depth clipping planes of the view volume are
+disabled and the depth value will be clamped at the per-pixel level, after
+polygon offset has been applied and before depth testing.</dd>
+<dt>clip_plane_enable</dt>
+<dd>For each k in [0, PIPE_MAX_CLIP_PLANES), if bit k of this field is set,
+clipping half-space k is enabled, if it is clear, it is disabled.
+The clipping half-spaces are defined either by the user clip planes in
+<tt class="docutils literal"><span class="pre">pipe_clip_state</span></tt>, or by the clip distance outputs of the shader stage
+preceding the fragment shader.
+If any clip distance output is written, those half-spaces for which no
+clip distance is written count as disabled; i.e. user clip planes and
+shader clip distances cannot be mixed, and clip distances take precedence.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Rasterizer</a><ul>
+<li><a class="reference internal" href="#clamp-vertex-color">clamp_vertex_color</a></li>
+<li><a class="reference internal" href="#clamp-fragment-color">clamp_fragment_color</a><ul>
+<li><a class="reference internal" href="#shading">Shading</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#flatshade">flatshade</a></li>
+<li><a class="reference internal" href="#flatshade-first">flatshade_first</a><ul>
+<li><a class="reference internal" href="#polygons">Polygons</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#light-twoside">light_twoside</a><ul>
+<li><a class="reference internal" href="#lines">Lines</a></li>
+<li><a class="reference internal" href="#points">Points</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sprite-coord-enable">sprite_coord_enable</a></li>
+<li><a class="reference internal" href="#sprite-coord-mode">sprite_coord_mode</a></li>
+<li><a class="reference internal" href="#point-quad-rasterization">point_quad_rasterization</a><ul>
+<li><a class="reference internal" href="#other-members">Other Members</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dsa.html"
+                        title="previous chapter">Depth, Stencil, &amp; Alpha</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sampler.html"
+                        title="next chapter">Sampler</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/cso/rasterizer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="sampler.html" title="Sampler"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dsa.html" title="Depth, Stencil, &amp; Alpha"
+             >previous</a> |</li>
+        <li><a href="../index.html">Gallium 0.4 documentation</a> &raquo;</li>
+          <li><a href="../cso.html" >CSO</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

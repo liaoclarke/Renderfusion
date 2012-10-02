@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Screen &mdash; Gallium 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gallium 0.4 documentation" href="index.html" />
+    <link rel="next" title="Resources and derived objects" href="resources.html" />
+    <link rel="prev" title="TGSI" href="tgsi.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="resources.html" title="Resources and derived objects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tgsi.html" title="TGSI"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="screen">
+<span id="id1"></span><h1>Screen<a class="headerlink" href="#screen" title="Permalink to this headline">¶</a></h1>
+<p>A screen is an object representing the context-independent part of a device.</p>
+<div class="section" id="flags-and-enumerations">
+<h2>Flags and enumerations<a class="headerlink" href="#flags-and-enumerations" title="Permalink to this headline">¶</a></h2>
+<p>XXX some of these don&#8217;t belong in this section.</p>
+<div class="section" id="pipe-cap">
+<span id="id2"></span><h3>PIPE_CAP_*<a class="headerlink" href="#pipe-cap" title="Permalink to this headline">¶</a></h3>
+<p>Capability queries return information about the features and limits of the
+driver/GPU.  For floating-point values, use <a class="reference internal" href="#get-paramf"><em>get_paramf</em></a>, and for boolean
+or integer values, use <a class="reference internal" href="#get-param"><em>get_param</em></a>.</p>
+<p>The integer capabilities:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_NPOT_TEXTURES</span></tt>: Whether <a class="reference internal" href="glossary.html#term-npot"><em class="xref std std-term">NPOT</em></a> textures may have repeat modes,
+normalized coordinates, and mipmaps.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TWO_SIDED_STENCIL</span></tt>: Whether the stencil test can also affect back-facing
+polygons.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_DUAL_SOURCE_RENDER_TARGETS</span></tt>: How many dual-source blend RTs are support.
+<a class="reference internal" href="cso/blend.html#blend"><em>Blend</em></a> for more information.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_ANISOTROPIC_FILTER</span></tt>: Whether textures can be filtered anisotropically.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_POINT_SPRITE</span></tt>: Whether point sprites are available.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_RENDER_TARGETS</span></tt>: The maximum number of render targets that may be
+bound.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_OCCLUSION_QUERY</span></tt>: Whether occlusion queries are available.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TIMER_QUERY</span></tt>: Whether timer queries are available.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TEXTURE_SHADOW_MAP</span></tt>: indicates whether the fragment shader hardware
+can do the depth texture / Z comparison operation in TEX instructions
+for shadow testing.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TEXTURE_SWIZZLE</span></tt>: Whether swizzling through sampler views is
+supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_TEXTURE_2D_LEVELS</span></tt>: The maximum number of mipmap levels available
+for a 2D texture.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_TEXTURE_3D_LEVELS</span></tt>: The maximum number of mipmap levels available
+for a 3D texture.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS</span></tt>: The maximum number of mipmap levels available
+for a cubemap.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TEXTURE_MIRROR_CLAMP</span></tt>: Whether mirrored texture coordinates with clamp
+are supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_BLEND_EQUATION_SEPARATE</span></tt>: Whether alpha blend equations may be different
+from color blend equations, in <a class="reference internal" href="cso/blend.html#blend"><em>Blend</em></a> state.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_SM3</span></tt>: Whether the vertex shader and fragment shader support equivalent
+opcodes to the Shader Model 3 specification. XXX oh god this is horrible</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS</span></tt>: The maximum number of stream buffers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_PRIMITIVE_RESTART</span></tt>: Whether primitive restart is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_COMBINED_SAMPLERS</span></tt>: The total number of samplers accessible from
+the vertex and fragment shader, inclusive.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_INDEP_BLEND_ENABLE</span></tt>: Whether per-rendertarget blend enabling and channel
+masks are supported. If 0, then the first rendertarget&#8217;s blend mask is
+replicated across all MRTs.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_INDEP_BLEND_FUNC</span></tt>: Whether per-rendertarget blend functions are
+available. If 0, then the first rendertarget&#8217;s blend functions affect all
+MRTs.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_DEPTHSTENCIL_CLEAR_SEPARATE</span></tt>: Whether clearing only depth or only
+stencil in a combined depth-stencil buffer is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS</span></tt>: The maximum number of texture array
+layers supported. If 0, the array textures are not supported at all and
+the ARRAY texture targets are invalid.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TGSI_FS_COORD_ORIGIN_UPPER_LEFT</span></tt>: Whether the TGSI property
+FS_COORD_ORIGIN with value UPPER_LEFT is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TGSI_FS_COORD_ORIGIN_LOWER_LEFT</span></tt>: Whether the TGSI property
+FS_COORD_ORIGIN with value LOWER_LEFT is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_HALF_INTEGER</span></tt>: Whether the TGSI
+property FS_COORD_PIXEL_CENTER with value HALF_INTEGER is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TGSI_FS_COORD_PIXEL_CENTER_INTEGER</span></tt>: Whether the TGSI
+property FS_COORD_PIXEL_CENTER with value INTEGER is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_DEPTH_CLIP_DISABLE</span></tt>: Whether the driver is capable of disabling
+depth clipping (through pipe_rasterizer_state)</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_SHADER_STENCIL_EXPORT</span></tt>: Whether a stencil reference value can be
+written from a fragment shader.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_TGSI_INSTANCEID</span></tt>: Whether TGSI_SEMANTIC_INSTANCEID is supported
+in the vertex shader.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR</span></tt>: Whether the driver supports
+per-instance vertex attribs.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_FRAGMENT_COLOR_CLAMPED</span></tt>: Whether fragment color clamping is
+supported.  That is, is the pipe_rasterizer_state::clamp_fragment_color
+flag supported by the driver?  If not, the state tracker will insert
+clamping code into the fragment shaders when needed.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_MIXED_COLORBUFFER_FORMATS</span></tt>: Whether mixed colorbuffer formats are
+supported, e.g. RGBA8 and RGBA32F as the first and second colorbuffer, resp.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_COLOR_UNCLAMPED</span></tt>: Whether the driver is capable of
+outputting unclamped vertex colors from a vertex shader. If unsupported,
+the vertex colors are always clamped. This is the default for DX9 hardware.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_COLOR_CLAMPED</span></tt>: Whether the driver is capable of
+clamping vertex colors when they come out of a vertex shader, as specified
+by the pipe_rasterizer_state::clamp_vertex_color flag.  If unsupported,
+the vertex colors are never clamped. This is the default for DX10 hardware.
+If both clamped and unclamped CAPs are supported, the clamping can be
+controlled through pipe_rasterizer_state.  If the driver cannot do vertex
+color clamping, the state tracker may insert clamping code into the vertex
+shader.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_GLSL_FEATURE_LEVEL</span></tt>: Whether the driver supports features
+equivalent to a specific GLSL version. E.g. for GLSL 1.3, report 130.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION</span></tt>: Whether quads adhere to
+the flatshade_first setting in <tt class="docutils literal"><span class="pre">pipe_rasterizer_state</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_USER_VERTEX_BUFFERS</span></tt>: Whether the driver supports user vertex
+buffers.  If not, the state tracker must upload all data which is not in hw
+resources.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_BUFFER_OFFSET_4BYTE_ALIGNED_ONLY</span></tt>: This CAP describes a hw
+limitation.  If true, pipe_vertex_buffer::buffer_offset must always be aligned
+to 4.  If false, there are no restrictions on the offset.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_BUFFER_STRIDE_4BYTE_ALIGNED_ONLY</span></tt>: This CAP describes a hw
+limitation.  If true, pipe_vertex_buffer::stride must always be aligned to 4.
+If false, there are no restrictions on the stride.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_VERTEX_ELEMENT_SRC_OFFSET_4BYTE_ALIGNED_ONLY</span></tt>: This CAP describes
+a hw limitation.  If true, pipe_vertex_element::src_offset must always be
+aligned to 4.  If false, there are no restrictions on src_offset.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_COMPUTE</span></tt>: Whether the implementation supports the
+compute entry points defined in pipe_context and pipe_screen.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_USER_INDEX_BUFFERS</span></tt>: Whether user index buffers are supported.
+If not, the state tracker must upload all indices which are not in hw
+resources.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_USER_CONSTANT_BUFFERS</span></tt>: Whether user constant buffers are
+supported. If not, the state tracker must upload constants which are not in hw
+resources.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_CONSTANT_BUFFER_OFFSET_ALIGNMENT</span></tt>: Describes the required
+alignment of pipe_constant_buffer::buffer_offset.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_START_INSTANCE</span></tt>: Whether the driver supports
+pipe_draw_info::start_instance.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAP_QUERY_TIMESTAMP</span></tt>: Whether PIPE_QUERY_TIMESTAMP and
+the pipe_screen::get_timestamp hook are implemented.</li>
+</ul>
+</div>
+<div class="section" id="pipe-capf">
+<span id="id3"></span><h3>PIPE_CAPF_*<a class="headerlink" href="#pipe-capf" title="Permalink to this headline">¶</a></h3>
+<p>The floating-point capabilities are:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_LINE_WIDTH</span></tt>: The maximum width of a regular line.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_LINE_WIDTH_AA</span></tt>: The maximum width of a smoothed line.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_POINT_WIDTH</span></tt>: The maximum width and height of a point.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_POINT_WIDTH_AA</span></tt>: The maximum width and height of a smoothed point.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_TEXTURE_ANISOTROPY</span></tt>: The maximum level of anisotropy that can be
+applied to anisotropically filtered textures.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_MAX_TEXTURE_LOD_BIAS</span></tt>: The maximum <a class="reference internal" href="glossary.html#term-lod"><em class="xref std std-term">LOD</em></a> bias that may be applied
+to filtered textures.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_CAPF_GUARD_BAND_LEFT</span></tt>,
+<tt class="docutils literal"><span class="pre">PIPE_CAPF_GUARD_BAND_TOP</span></tt>,
+<tt class="docutils literal"><span class="pre">PIPE_CAPF_GUARD_BAND_RIGHT</span></tt>,
+<tt class="docutils literal"><span class="pre">PIPE_CAPF_GUARD_BAND_BOTTOM</span></tt>: TODO</li>
+</ul>
+</div>
+<div class="section" id="pipe-shader-cap">
+<span id="id4"></span><h3>PIPE_SHADER_CAP_*<a class="headerlink" href="#pipe-shader-cap" title="Permalink to this headline">¶</a></h3>
+<p>These are per-shader-stage capabitity queries. Different shader stages may
+support different features.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_INSTRUCTIONS</span></tt>: The maximum number of instructions.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS</span></tt>: The maximum number of arithmetic instructions.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS</span></tt>: The maximum number of texture instructions.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS</span></tt>: The maximum number of texture indirections.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH</span></tt>: The maximum nested control flow depth.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_INPUTS</span></tt>: The maximum number of input registers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_CONSTS</span></tt>: The maximum number of constants.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_CONST_BUFFERS</span></tt>: Maximum number of constant buffers that can be bound
+to any shader stage using <tt class="docutils literal"><span class="pre">set_constant_buffer</span></tt>. If 0 or 1, the pipe will
+only permit binding one constant buffer per shader, and the shaders will
+not permit two-dimensional access to constants.</li>
+</ul>
+<p>If a value greater than 0 is returned, the driver can have multiple
+constant buffers bound to shader stages. The CONST register file can
+be accessed with two-dimensional indices, like in the example below.</p>
+<p>DCL CONST[0][0..7]       # declare first 8 vectors of constbuf 0
+DCL CONST[3][0]          # declare first vector of constbuf 3
+MOV OUT[0], CONST[0][3]  # copy vector 3 of constbuf 0</p>
+<p>For backwards compatibility, one-dimensional access to CONST register
+file is still supported. In that case, the constbuf index is assumed
+to be 0.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_TEMPS</span></tt>: The maximum number of temporary registers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_ADDRS</span></tt>: The maximum number of address registers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_PREDS</span></tt>: The maximum number of predicate registers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED</span></tt>: Whether the continue opcode is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR</span></tt>: Whether indirect addressing
+of the input file is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_INDIRECT_OUTPUT_ADDR</span></tt>: Whether indirect addressing
+of the output file is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_INDIRECT_TEMP_ADDR</span></tt>: Whether indirect addressing
+of the temporary file is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_INDIRECT_CONST_ADDR</span></tt>: Whether indirect addressing
+of the constant file is supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_SUBROUTINES</span></tt>: Whether subroutines are supported, i.e.
+BGNSUB, ENDSUB, CAL, and RET, including RET in the main block.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_INTEGERS</span></tt>: Whether integer opcodes are supported.
+If unsupported, only float opcodes are supported.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS</span></tt>: THe maximum number of texture
+samplers.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_SHADER_CAP_PREFERRED_IR</span></tt>: Preferred representation of the
+program.  It should be one of the <tt class="docutils literal"><span class="pre">pipe_shader_ir</span></tt> enum values.</li>
+</ul>
+</div>
+<div class="section" id="pipe-compute-cap">
+<span id="id5"></span><h3>PIPE_COMPUTE_CAP_*<a class="headerlink" href="#pipe-compute-cap" title="Permalink to this headline">¶</a></h3>
+<p>Compute-specific capabilities. They can be queried using
+pipe_screen::get_compute_param.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_IR_TARGET</span></tt>: A description of the target as a target
+triple specification of the form <tt class="docutils literal"><span class="pre">processor-manufacturer-os</span></tt> that will
+be passed on to the compiler.  This CAP is only relevant for drivers
+that specify PIPE_SHADER_IR_LLVM for their preferred IR.
+Value type: null-terminated string.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_GRID_DIMENSION</span></tt>: Number of supported dimensions
+for grid and block coordinates.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_GRID_SIZE</span></tt>: Maximum grid size in block
+units.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span> <span class="pre">[]</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_BLOCK_SIZE</span></tt>: Maximum block size in thread
+units.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span> <span class="pre">[]</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_THREADS_PER_BLOCK</span></tt>: Maximum number of threads that
+a single block can contain.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.
+This may be less than the product of the components of MAX_BLOCK_SIZE and is
+usually limited by the number of threads that can be resident simultaneously
+on a compute unit.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_GLOBAL_SIZE</span></tt>: Maximum size of the GLOBAL
+resource.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_LOCAL_SIZE</span></tt>: Maximum size of the LOCAL
+resource.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_PRIVATE_SIZE</span></tt>: Maximum size of the PRIVATE
+resource.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_INPUT_SIZE</span></tt>: Maximum size of the INPUT
+resource.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_COMPUTE_CAP_MAX_MEM_ALLOC_SIZE</span></tt>: Maximum size of a memory object
+allocation in bytes.  Value type: <tt class="docutils literal"><span class="pre">uint64_t</span></tt>.</li>
+</ul>
+</div>
+<div class="section" id="pipe-bind">
+<span id="id6"></span><h3>PIPE_BIND_*<a class="headerlink" href="#pipe-bind" title="Permalink to this headline">¶</a></h3>
+<p>These flags indicate how a resource will be used and are specified at resource
+creation time. Resources may be used in different roles
+during their lifecycle. Bind flags are cumulative and may be combined to create
+a resource which can be used for multiple things.
+Depending on the pipe driver&#8217;s memory management and these bind flags,
+resources might be created and handled quite differently.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_RENDER_TARGET</span></tt>: A color buffer or pixel buffer which will be
+rendered to.  Any surface/resource attached to pipe_framebuffer_state::cbufs
+must have this flag set.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_DEPTH_STENCIL</span></tt>: A depth (Z) buffer and/or stencil buffer. Any
+depth/stencil surface/resource attached to pipe_framebuffer_state::zsbuf must
+have this flag set.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_BLENDABLE</span></tt>: Used in conjunction with PIPE_BIND_RENDER_TARGET to
+query whether a device supports blending for a given format.
+If this flag is set, surface creation may fail if blending is not supported
+for the specified format. If it is not set, a driver may choose to ignore
+blending on surfaces with formats that would require emulation.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_DISPLAY_TARGET</span></tt>: A surface that can be presented to screen. Arguments to
+pipe_screen::flush_front_buffer must have this flag set.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_SAMPLER_VIEW</span></tt>: A texture that may be sampled from in a fragment
+or vertex shader.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_VERTEX_BUFFER</span></tt>: A vertex buffer.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_INDEX_BUFFER</span></tt>: An vertex index/element buffer.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_CONSTANT_BUFFER</span></tt>: A buffer of shader constants.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_TRANSFER_WRITE</span></tt>: A transfer object which will be written to.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_TRANSFER_READ</span></tt>: A transfer object which will be read from.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_STREAM_OUTPUT</span></tt>: A stream output buffer.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_CUSTOM</span></tt>:</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_SCANOUT</span></tt>: A front color buffer or scanout buffer.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_SHARED</span></tt>: A sharable buffer that can be given to another
+process.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_GLOBAL</span></tt>: A buffer that can be mapped into the global
+address space of a compute program.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_SHADER_RESOURCE</span></tt>: A buffer or texture that can be
+bound to the graphics pipeline as a shader resource.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_BIND_COMPUTE_RESOURCE</span></tt>: A buffer or texture that can be
+bound to the compute program as a shader resource.</li>
+</ul>
+</div>
+<div class="section" id="pipe-usage">
+<span id="id7"></span><h3>PIPE_USAGE_*<a class="headerlink" href="#pipe-usage" title="Permalink to this headline">¶</a></h3>
+<p>The PIPE_USAGE enums are hints about the expected usage pattern of a resource.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">PIPE_USAGE_DEFAULT</span></tt>: Expect many uploads to the resource, intermixed with draws.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_USAGE_DYNAMIC</span></tt>: Expect many uploads to the resource, intermixed with draws.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_USAGE_STATIC</span></tt>: Same as immutable (?)</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_USAGE_IMMUTABLE</span></tt>: Resource will not be changed after first upload.</li>
+<li><tt class="docutils literal"><span class="pre">PIPE_USAGE_STREAM</span></tt>: Upload will be followed by draw, followed by upload, ...</li>
+</ul>
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<p>XXX to-do</p>
+<div class="section" id="get-name">
+<h3>get_name<a class="headerlink" href="#get-name" title="Permalink to this headline">¶</a></h3>
+<p>Returns an identifying name for the screen.</p>
+</div>
+<div class="section" id="get-vendor">
+<h3>get_vendor<a class="headerlink" href="#get-vendor" title="Permalink to this headline">¶</a></h3>
+<p>Returns the screen vendor.</p>
+</div>
+<div class="section" id="get-param">
+<span id="id8"></span><h3>get_param<a class="headerlink" href="#get-param" title="Permalink to this headline">¶</a></h3>
+<p>Get an integer/boolean screen parameter.</p>
+<p><strong>param</strong> is one of the <a class="reference internal" href="#pipe-cap"><em>PIPE_CAP_*</em></a> names.</p>
+</div>
+<div class="section" id="get-paramf">
+<span id="id9"></span><h3>get_paramf<a class="headerlink" href="#get-paramf" title="Permalink to this headline">¶</a></h3>
+<p>Get a floating-point screen parameter.</p>
+<p><strong>param</strong> is one of the <a class="reference internal" href="#pipe-cap"><em>PIPE_CAP_*</em></a> names.</p>
+</div>
+<div class="section" id="context-create">
+<h3>context_create<a class="headerlink" href="#context-create" title="Permalink to this headline">¶</a></h3>
+<p>Create a pipe_context.</p>
+<p><strong>priv</strong> is private data of the caller, which may be put to various
+unspecified uses, typically to do with implementing swapbuffers
+and/or front-buffer rendering.</p>
+</div>
+<div class="section" id="is-format-supported">
+<h3>is_format_supported<a class="headerlink" href="#is-format-supported" title="Permalink to this headline">¶</a></h3>
+<p>Determine if a resource in the given format can be used in a specific manner.</p>
+<p><strong>format</strong> the resource format</p>
+<p><strong>target</strong> one of the PIPE_TEXTURE_x flags</p>
+<p><strong>sample_count</strong> the number of samples. 0 and 1 mean no multisampling,
+the maximum allowed legal value is 32.</p>
+<p><strong>bindings</strong> is a bitmask of <a class="reference internal" href="#pipe-bind"><em>PIPE_BIND_*</em></a> flags.</p>
+<p><strong>geom_flags</strong> is a bitmask of PIPE_TEXTURE_GEOM_x flags.</p>
+<p>Returns TRUE if all usages can be satisfied.</p>
+</div>
+<div class="section" id="can-create-resource">
+<h3>can_create_resource<a class="headerlink" href="#can-create-resource" title="Permalink to this headline">¶</a></h3>
+<p>Check if a resource can actually be created (but don&#8217;t actually allocate any
+memory).  This is used to implement OpenGL&#8217;s proxy textures.  Typically, a
+driver will simply check if the total size of the given resource is less than
+some limit.</p>
+</div>
+<div class="section" id="resource-create">
+<span id="id10"></span><h3>resource_create<a class="headerlink" href="#resource-create" title="Permalink to this headline">¶</a></h3>
+<p>Create a new resource from a template.
+The following fields of the pipe_resource must be specified in the template:</p>
+<p><strong>target</strong> one of the pipe_texture_target enums.
+Note that PIPE_BUFFER and PIPE_TEXTURE_X are not really fundamentally different.
+Modern APIs allow using buffers as shader resources.</p>
+<p><strong>format</strong> one of the pipe_format enums.</p>
+<p><strong>width0</strong> the width of the base mip level of the texture or size of the buffer.</p>
+<p><strong>height0</strong> the height of the base mip level of the texture
+(1 for 1D or 1D array textures).</p>
+<p><strong>depth0</strong> the depth of the base mip level of the texture
+(1 for everything else).</p>
+<p><strong>array_size</strong> the array size for 1D and 2D array textures.
+For cube maps this must be 6, for other textures 1.</p>
+<p><strong>last_level</strong> the last mip map level present.</p>
+<p><strong>nr_samples</strong> the nr of msaa samples. 0 (or 1) specifies a resource
+which isn&#8217;t multisampled.</p>
+<p><strong>usage</strong> one of the PIPE_USAGE flags.</p>
+<p><strong>bind</strong> bitmask of the PIPE_BIND flags.</p>
+<p><strong>flags</strong> bitmask of PIPE_RESOURCE_FLAG flags.</p>
+</div>
+<div class="section" id="resource-destroy">
+<h3>resource_destroy<a class="headerlink" href="#resource-destroy" title="Permalink to this headline">¶</a></h3>
+<p>Destroy a resource. A resource is destroyed if it has no more references.</p>
+</div>
+<div class="section" id="get-timestamp">
+<h3>get_timestamp<a class="headerlink" href="#get-timestamp" title="Permalink to this headline">¶</a></h3>
+<p>Query a timestamp in nanoseconds. The returned value should match
+PIPE_QUERY_TIMESTAMP. This function returns immediately and doesn&#8217;t
+wait for rendering to complete (which cannot be achieved with queries).</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Screen</a><ul>
+<li><a class="reference internal" href="#flags-and-enumerations">Flags and enumerations</a><ul>
+<li><a class="reference internal" href="#pipe-cap">PIPE_CAP_*</a></li>
+<li><a class="reference internal" href="#pipe-capf">PIPE_CAPF_*</a></li>
+<li><a class="reference internal" href="#pipe-shader-cap">PIPE_SHADER_CAP_*</a></li>
+<li><a class="reference internal" href="#pipe-compute-cap">PIPE_COMPUTE_CAP_*</a></li>
+<li><a class="reference internal" href="#pipe-bind">PIPE_BIND_*</a></li>
+<li><a class="reference internal" href="#pipe-usage">PIPE_USAGE_*</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#get-name">get_name</a></li>
+<li><a class="reference internal" href="#get-vendor">get_vendor</a></li>
+<li><a class="reference internal" href="#get-param">get_param</a></li>
+<li><a class="reference internal" href="#get-paramf">get_paramf</a></li>
+<li><a class="reference internal" href="#context-create">context_create</a></li>
+<li><a class="reference internal" href="#is-format-supported">is_format_supported</a></li>
+<li><a class="reference internal" href="#can-create-resource">can_create_resource</a></li>
+<li><a class="reference internal" href="#resource-create">resource_create</a></li>
+<li><a class="reference internal" href="#resource-destroy">resource_destroy</a></li>
+<li><a class="reference internal" href="#get-timestamp">get_timestamp</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tgsi.html"
+                        title="previous chapter">TGSI</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="resources.html"
+                        title="next chapter">Resources and derived objects</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/screen.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="resources.html" title="Resources and derived objects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tgsi.html" title="TGSI"
+             >previous</a> |</li>
+        <li><a href="index.html">Gallium 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009, VMware, X.org, Nouveau.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
