@@ -32,7 +32,8 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#include <libudev.h>
+//xliu: android hasn't had libudev. skip it.
+//#include <libudev.h>
 #include <xf86drm.h>
 
 #ifdef PIPE_LOADER_HAVE_XCB
@@ -62,6 +63,7 @@ struct pipe_loader_drm_device {
 static boolean
 find_drm_pci_id(struct pipe_loader_drm_device *ddev)
 {
+#if 0
    struct udev *udev = NULL;
    struct udev_device *parent, *device = NULL;
    struct stat stat;
@@ -97,6 +99,8 @@ find_drm_pci_id(struct pipe_loader_drm_device *ddev)
       udev_unref(udev);
 
    return FALSE;
+#endif 
+   return TRUE;
 }
 
 static boolean
