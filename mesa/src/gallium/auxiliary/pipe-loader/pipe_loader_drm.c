@@ -107,6 +107,7 @@ static boolean
 find_drm_driver_name(struct pipe_loader_drm_device *ddev)
 {
    struct pipe_loader_device *dev = &ddev->base;
+#if 0
    int i, j;
 
    for (i = 0; driver_map[i].driver; i++) {
@@ -129,6 +130,11 @@ find_drm_driver_name(struct pipe_loader_drm_device *ddev)
    return FALSE;
 
   found:
+   return TRUE;
+#endif
+   //xliu: until we have libudev, we can only cheat pipe-loader as r600.
+   dev->driver_name = "r600";
+   dev->u.pci.vendor_id = 0x1002;
    return TRUE;
 }
 
