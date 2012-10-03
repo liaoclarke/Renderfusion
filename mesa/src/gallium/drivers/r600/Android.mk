@@ -33,7 +33,7 @@ LOCAL_SRC_FILES := $(C_SOURCES)
 LOCAL_C_INCLUDES := \
     $(DRM_TOP) 
     
-
+LCOAL_CFLAGS += -DDEBUG -O0 -fno-inline
 LOCAL_MODULE := libmesa_pipe_r600
 
 include $(GALLIUM_COMMON_MK)
