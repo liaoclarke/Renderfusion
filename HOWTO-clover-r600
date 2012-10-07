@@ -1,0 +1,85 @@
+HOWTO-clover-r600
+DATE: 2012, Oct, 7th.
+
+This file describes how to build mesa and clover, which is an OpenCL implementation basing on Gallium, on AMD ATI GPUs. 
+The platform is ubuntu 12.04,i386. 
+
+1.How to build mesa
+the general guidance is here, but some details are a little out of date.
+http://x.debian.net/howto/build-mesa.html
+
+*obtain mesa and clover sources:
+clover has not yet been included by mesa release. clone mesa git repository. 
+we use the version: 0615e8324ca949a5f86614e727122bfb2f230135
+
+*update your autoconf/autoreconf tools:
+apu@E350:~$ sudo apt-cache search autoreconf
+autoconf2.13 - automatic configure script builder (obsolete version)
+dh-autoreconf - debhelper add-on to call autoreconf and clean up after the build
+apu@E350:~$ sudo apt-get install autoconfig2.13 dh-autoreconf
+
+*update your drm2/drm-dev/drm-xxx to 2.4.39. by now, apt-get is helpless to update those packages using the official source.
+you need to collect package on launchpad.net. you shall find i386 and amd64 packages here:
+https://launchpad.net/ubuntu/+source/libdrm/2.4.39-0ubuntu1
+
+libdrm2_2.4.39-0ubuntu1_amd64.deb
+libdrm2_2.4.39-0ubuntu1_i386.deb
+libdrm-dev_2.4.39-0ubuntu1_amd64.deb
+libdrm-dev_2.4.39-0ubuntu1_i386.deb
+libdrm-intel1_2.4.39-0ubuntu1_amd64.deb
+libdrm-intel1_2.4.39-0ubuntu1_i386.deb
+libdrm-nouveau1a_2.4.39-0ubuntu1_amd64.deb
+libdrm-nouveau1a_2.4.39-0ubuntu1_i386.deb
+libdrm-nouveau2_2.4.39-0ubuntu1_amd64.deb
+libdrm-nouveau2_2.4.39-0ubuntu1_i386.deb
+libdrm-radeon1_2.4.39-0ubuntu1_amd64.deb
+libdrm-radeon1_2.4.39-0ubuntu1_i386.deb
+libkms1_2.4.39-0ubuntu1_amd64.deb
+libkms1_2.4.39-0ubuntu1_i386.deb
+
+then, you need to install them manually and follow a certain sequence. i386 platform only need i386 packages, while x86_64 platform require you install both. 
+
+$sudo dpkg -i xxx.deb
+
+
+2.How to include clover?
+
+Thomas Stellar's wiki page:
+http://dri.freedesktop.org/wiki/GalliumCompute#How_to_Install
+
+our configure is simpler than previous guidance. 
+./configure --with-dri-drivers="" --with-gallium-drivers=r600 --enable-opencl --with-libclc-path=/path/to/libclc/
+
+3.Build builtins.bc
+builtins.bc is the standard opencl runtime library in LLVM BC form. if your kernel programs are compiled by clang front-end, you certainly need it to complete linkage. 
+
+without builtins.bc, opencl programs is okay to run, but may meet linker error as follows:
+clover: error: Cannot find linker input '/home/apu/libclc/r600--/lib/builtins.bc'
+
+you need to build libclc manually. you can find the git repository in forementioned tstallar's wiki page.
+
+./configure.py --with-llvm-config=/home/apu/opt/llvm/bin/llvm-config
+
+you may meet the following problem on i386 ubuntu. 
+
+apu@E350:~/libclc$ make VERBOSE=1
+LINK utils/prepare-builtins
+c++ -o utils/prepare-builtins utils/prepare-builtins.o -L/home/apu/opt/llvm/lib -lpthread -ldl -lm -lLLVMBitWriter -lLLVMBitReader -lLLVMCore -lLLVMSupport
+/home/apu/opt/llvm/lib/libLLVMSupport.a(Signals.o): In function `PrintStackTrace(void*)':
+Signals.cpp:(.text+0x6c): undefined reference to `dladdr'
+Signals.cpp:(.text+0x1f6): undefined reference to `dladdr'
+collect2: ld returned 1 exit status
+
+make: *** [utils/prepare-builtins] Error 1
+
+it's because your libdl.so on i386 doesn't support 'dladdr'. my bloody workaround is directly omit the reference of dladdr in Signals.cpp.
+
+the global configuration file of LLVM locates at "include/llvm/Config/config.h". change HAVE_DLFCN_h from 1 to 0.
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+
+#define HAVE_DLFCN_H 0
+ 
+4. Have fun!
+This repo contains some opencl examples:
+http://cgit.freedesktop.org/~tstellar/opencl-example/
