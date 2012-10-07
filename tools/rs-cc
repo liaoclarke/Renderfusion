@@ -1,0 +1,49 @@
+#!/bin/bash
+#this script invokes android's renderscript compiler and emit llvm and bt files.
+
+if [ "$ANDROID_SDK" = "" ]
+then
+    echo "set ANDROID_SDK first!"
+    exit 1
+else
+    echo "ANDROID_SDK = $ANDROID_SDK"
+fi
+if [ $# -lt 2 ] 
+then
+    echo "usage: $0 -d[ll|bc] file.rs"
+    exit 1
+fi
+
+INCLUDES=-I${ANDROID_SDK}/platform-tools/renderscript/clang-include/ 
+INCLUDES+=" -I${ANDROID_SDK}/platform-tools/renderscript/include/"
+DIR="./"
+while getopts ":d:" opt; do
+	case $opt in
+		d)
+			COMMAND=$OPTARG
+			case $COMMAND in
+				ll )
+                    CMD="-emit-llvm"
+					;;
+				bc )
+                    CMD="-emit-bc"
+					;;
+				* )
+					echo "Invalid option: -t$OPTARG"
+                    exit 1
+					;;
+			esac
+            shift 1
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG"
+			exit 1
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument."
+			exit 1
+			;;
+	esac
+done
+
+llvm-rs-cc ${INCLUDES} ${CMD} -o ${DIR}  $@
