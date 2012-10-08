@@ -130,7 +130,7 @@ unsigned clSimpleEnqueueNDRangeKernel(cl_command_queue command_queue,
 /*========== CONVENIENCE WRAPPERS=============================================*/
 /*============================================================================*/
 
-unsigned clSimpleInitGpuDevice(cl_device_id * device_id)
+unsigned clSimpleInitGpuDevice(struct cl_simple_context * context, cl_device_id * device_id)
 {
    cl_int error;
 
@@ -151,6 +151,7 @@ unsigned clSimpleInitGpuDevice(cl_device_id * device_id)
    }
 
    fprintf(stderr, "There are %u platforms.\n", total_platforms);
+   context->platform_id = platform_id; 
 
    error = clGetDeviceIDs(platform_id,
                           CL_DEVICE_TYPE_GPU,
@@ -287,7 +288,7 @@ unsigned clSimpleCreateKernelString(cl_context context, cl_device_id device_id,
 
 unsigned clSimpleSimpleInit(struct cl_simple_context * context, const char * kernel_name)
 {
-   if (!clSimpleInitGpuDevice(&context->device_id)) {
+   if (!clSimpleInitGpuDevice(context, &context->device_id)) {
       return 0;
    }
 

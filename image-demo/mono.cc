@@ -3,6 +3,7 @@
 
 #include <CL/cl.h>
 #include "cl_simple.h"
+#include "cl_util.h"
 #include "imgsupport.hpp"
 
 int main()
@@ -29,10 +30,24 @@ int main()
     struct cl_simple_context ctx;
     cl_mem in_buffer;
     cl_int error;
-
+    char info[80];
+    
     if ( !clSimpleSimpleInit(&ctx, "mono") ) {
         printf("failed to load kernel mono\n"); 
         exit(1);
+    }
+
+    if ( CL_SUCCESS == (error = clGetPlatformInfo(ctx.platform_id, CL_PLATFORM_VERSION, sizeof(info), info, NULL)) ) {
+        printf("OpenCL version: %s\n", info);     
+    }
+    else {
+        printf("FAILED: %s\n", clUtilErrorString(error));
+    }
+    if ( CL_SUCCESS == clGetPlatformInfo(ctx.platform_id, CL_PLATFORM_NAME, sizeof(info), info, NULL) ) {
+        printf("\t name: %s\n", info);     
+    }
+    if ( CL_SUCCESS == clGetPlatformInfo(ctx.platform_id, CL_PLATFORM_NAME, sizeof(info), info, NULL) ) {
+        printf("\t vendor: %s\n", info);     
     }
 
     clSimpleSetOutputBuffer(&ctx, data_size);

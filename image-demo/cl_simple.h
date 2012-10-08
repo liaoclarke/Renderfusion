@@ -1,5 +1,6 @@
 
 struct cl_simple_context {
+   cl_platform_id platform_id;
    cl_device_id device_id;
    cl_context cl_ctx;
    cl_command_queue command_queue;
@@ -22,7 +23,7 @@ unsigned clSimpleEnqueueNDRangeKernel(cl_command_queue command_queue,
       cl_kernel kernel, cl_uint work_dim, const size_t * global_work_size,
       const size_t * local_work_size);
 
-unsigned clSimpleInitGpuDevice(cl_device_id * device_id);
+unsigned clSimpleInitGpuDevice(struct cl_simple_context *, cl_device_id * device_id);
 unsigned clSimpleCreateKernel(cl_context context, cl_device_id device_id,
                          cl_kernel * kernel, const char * kernel_name);
 unsigned clSimpleCreateKernelString(cl_context context, cl_device_id device_id,
