@@ -7,7 +7,7 @@ LDFLAGS = -L/usr/local/lib -L$(HOME)/opt/mesa/lib -lOpenCL
 all: mono
 
 %.o: %.cc
-	g++ -o $@ -c $(CXXFLAGS) $^
+	g++ -o $@ -g -c $(CXXFLAGS) $^
 
 mono: mono.o imgsupport.o $(COMMON_OBJECTS)
 	g++ -o $@ $^ $(LDFLAGS) -lpng

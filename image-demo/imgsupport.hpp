@@ -77,9 +77,9 @@ namespace vina{
 
     void setData(unsigned char * raw) {
       assert( file_ != 0 && !reader_ && "writer file is invalid");
+      unsigned char * row_pointers[height_];
 
       int bytes_per_pixel = getChannel() * (bit_depth_ >> 3);
-      unsigned char * row_pointers[height_];
       png_set_IHDR(handle_, info_, width_, height_, bit_depth_, color_type_, 0, 0, 0);
       png_write_info(handle_, info_);
       for (int k=0; k<height_; ++k)
