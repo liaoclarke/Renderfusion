@@ -16,7 +16,8 @@ we use the version: 0615e8324ca949a5f86614e727122bfb2f230135
 apu@E350:~$ sudo apt-cache search autoreconf
 autoconf2.13 - automatic configure script builder (obsolete version)
 dh-autoreconf - debhelper add-on to call autoreconf and clean up after the build
-apu@E350:~$ sudo apt-get install autoconfig2.13 dh-autoreconf
+
+apu@E350:~$ sudo apt-get install autoconfig dh-autoreconf
 
 *update your drm2/drm-dev/drm-xxx to 2.4.39. by now, apt-get is helpless to update those packages using the official source.
 you need to collect package on launchpad.net. you shall find i386 and amd64 packages here:
@@ -37,7 +38,7 @@ libdrm-radeon1_2.4.39-0ubuntu1_i386.deb
 libkms1_2.4.39-0ubuntu1_amd64.deb
 libkms1_2.4.39-0ubuntu1_i386.deb
 
-then, you need to install them manually and follow a certain sequence. i386 platform only need i386 packages, while x86_64 platform require you install both. 
+then, you need to install them manually and follow a certain sequence. i386 platform only need i386 packages, while x86_64 platform require you install amd64 packages.
 
 $sudo dpkg -i xxx.deb
 
