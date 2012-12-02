@@ -56,7 +56,7 @@ LOCAL_SRC_FILES :=			\
 	radeon/radeon_cs_space.c	\
 	radeon/radeon_bo.c		\
 	radeon/radeon_cs.c		\
-	radeon/radeon_surface.c	\
+	radeon/radeon_surface.c		\
 	radeon/bof.c
 
 LOCAL_C_INCLUDES +=			\
