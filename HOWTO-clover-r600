@@ -58,6 +58,7 @@ without builtins.bc, opencl programs is okay to run, but may meet linker error a
 clover: error: Cannot find linker input '/home/apu/libclc/r600--/lib/builtins.bc'
 
 you need to build libclc manually. you can find the git repository in forementioned tstallar's wiki page.
+git://people.freedesktop.org/~tstellar/libclc
 
 ./configure.py --with-llvm-config=/home/apu/opt/llvm/bin/llvm-config
 
